@@ -51,5 +51,6 @@
    (let [current-scene @(rf/subscribe [:current-scene])]
      (case (:title current-scene)
        :start [start-scene current-scene]
-       :one [scene-one current-scene]))
+       :one [scene-one current-scene]
+       [:div "default"]))
    [:div @(rf/subscribe [:message])]])
