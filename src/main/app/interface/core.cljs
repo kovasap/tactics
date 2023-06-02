@@ -17,7 +17,20 @@
 (rf/reg-event-db
   :app/setup
   (fn [db _]
-    db))
+    (-> db
+        (assoc :scenes [{:title :start} {:title :one}])
+        (assoc :current-scene-idx 0))))
+
+(rf/reg-event-db
+  :advance-scene
+  (undoable "Advancing scene")
+  (fn [db _]
+    (update db :current-scene-idx inc)))
+
+(rf/reg-sub
+  :current-scene
+  (fn [db _]
+    (get (:scenes db) (:current-scene-idx db))))
 
 (rf/reg-event-db
   :message

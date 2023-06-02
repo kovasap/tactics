@@ -3,6 +3,8 @@
             [reagent.core :as r]
             ; [ring.middleware.anti-forgery]
             [app.interface.sente :refer [chsk-state login]]
+            [app.interface.view.scenes.start :refer [start-scene]]
+            [app.interface.view.scenes.one :refer [scene-one]]
             [cljs.pprint]))
 
 (defn undo-button
@@ -43,5 +45,11 @@
    [:div {:style {:display "flex"}}
     [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:app/setup])}
      "Reset App"]
+    [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:advance-scene])}
+     "Next Scene"]
     [undo-button]]
+   (let [current-scene @(rf/subscribe [:current-scene])]
+     (case (:title current-scene)
+       :start [start-scene current-scene]
+       :one [scene-one current-scene]))
    [:div @(rf/subscribe [:message])]])
