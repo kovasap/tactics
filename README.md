@@ -1,4 +1,4 @@
-# My CLJS App Template
+# Tactics
 
 ## Setup
 
