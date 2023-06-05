@@ -8,17 +8,32 @@
             [app.interface.sente :refer [send-state-to-server!]]
             [app.interface.view.main :refer [main]]
             [app.interface.utils :refer [get-only]]
+            [app.interface.gridmap :refer [parse-gridmap-str]]
             [cljs.pprint]
             [taoensso.timbre :as log]))
 
 ;; ----------------------------------------------------------------------------
 ;; Setup
 
+(def scene-one
+  {:gridmap (parse-gridmap-str 
+              "F   M   M   F   F   P   P   W  
+               W   W   M   F   F   P   P   W
+               W   M   F   F   F   P   P   W
+               W   M   M   F   F   P   P   W
+               W   M   M   F   F   F   P   W
+               W   M   M   F   F   F   F   W
+               W   M   M   F   W   F   F   W
+               W   M   M   W   W   W   F   W
+               S   M   S   S   W   F   F   W
+               S   S   S   S   S   F   F   W
+               S   S   S   S   S   F   F   W")})
+
 (rf/reg-event-db
   :app/setup
   (fn [db _]
     (-> db
-        (assoc :scenes [{:title :start} {:title :one}])
+        (assoc :scenes [{:title :start} scene-one])
         (assoc :current-scene-idx 0))))
 
 (rf/reg-event-db
@@ -31,6 +46,11 @@
   :current-scene
   (fn [db _]
     (get (:scenes db) (:current-scene-idx db))))
+
+(rf/reg-sub
+  :current-gridmap
+  (fn [db _]
+    (:gridmap @(rf/subscribe [:current-scene]))))
 
 (rf/reg-event-db
   :message

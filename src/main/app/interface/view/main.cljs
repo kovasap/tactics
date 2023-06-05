@@ -4,7 +4,7 @@
             ; [ring.middleware.anti-forgery]
             [app.interface.sente :refer [chsk-state login]]
             [app.interface.view.scenes.start :refer [start-scene]]
-            [app.interface.view.scenes.one :refer [scene-one]]
+            [app.interface.view.tactical-scenario :refer [tactical-scenario]]
             [cljs.pprint]))
 
 (defn undo-button
@@ -49,8 +49,8 @@
      "Next Scene"]
     [undo-button]]
    (let [current-scene @(rf/subscribe [:current-scene])]
-     (case (:title current-scene)
-       :start [start-scene current-scene]
-       :one [scene-one current-scene]
-       [:div "default"]))
+     (cond
+       (= :start (:title current-scene)) [start-scene current-scene]
+       (contains? current-scene :gridmap) #p [tactical-scenario current-scene]
+       :else [:div "default"]))
    [:div @(rf/subscribe [:message])]])
