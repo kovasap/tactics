@@ -17,7 +17,7 @@
 
 (def scene-one
   {:gridmap (parse-gridmap-str 
-              "F   M   M   F   F   P   P   W  
+              "FM  M   M   F   F   P   P   W  
                W   W   M   F   F   P   P   W
                W   M   F   F   F   P   P   W
                W   M   M   F   F   P   P   W
@@ -34,6 +34,7 @@
   (fn [db _]
     (-> db
         (assoc :scenes [{:title :start} scene-one])
+        (assoc :characters []) 
         (assoc :current-scene-idx 0))))
 
 (rf/reg-event-db

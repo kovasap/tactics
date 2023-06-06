@@ -2,6 +2,7 @@
   (:require [re-frame.core :as rf]
             [reagent.core :as r]
             [clojure.string :as st]
+            [app.interface.view.character :refer [character-view]]
             [app.interface.config :refer [debug]]
             [app.interface.utils :refer [get-only]]))
 
@@ -9,12 +10,15 @@
 (defn tile-view
   [{:keys [land
            row-idx
-           col-idx]
+           col-idx
+           character-full-name]
     :as   tile}]
-  (let []
+  (let [characters-by-full-name @(rf/subscribe [:characters-by-full-name])]
     [:div.tile
      {:style         {:font-size  "12px"
                       :text-align "center"
+                      :height "120px"
+                      :width "120px"
                       :aspect-ratio "1"
                       :position   "relative"}
       :on-mouse-over #()
@@ -31,16 +35,18 @@
       [:div {:style {:display (if debug "block" "none")}}
        row-idx
        ", "
-       col-idx]]]))
+       col-idx]
+      [character-view #p (get characters-by-full-name character-full-name)]]]))
 
 
 (defn gridmap-view
   []
   (let [gridmap @(rf/subscribe [:current-gridmap])]
-    (into
-      [:div.gridmap
-       {:style {:display "grid"
-                :grid-template-columns (st/join " " (for [_ gridmap] "1fr"))
-                :grid-gap "1px"}}]
-      (reduce concat
-        (for [column gridmap] (for [tile column] (tile-view tile)))))))
+    (into [:div.gridmap
+           {:style {:display  "grid"
+                    :grid-template-columns (st/join " "
+                                                    (for [_ (first gridmap)]
+                                                      "1fr"))
+                    :grid-gap "1px"}}]
+          (reduce concat
+            (for [column gridmap] (for [tile column] (tile-view tile)))))))

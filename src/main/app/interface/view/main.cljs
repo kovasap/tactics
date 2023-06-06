@@ -51,6 +51,6 @@
    (let [current-scene @(rf/subscribe [:current-scene])]
      (cond
        (= :start (:title current-scene)) [start-scene current-scene]
-       (contains? current-scene :gridmap) #p [tactical-scenario current-scene]
+       (contains? current-scene :gridmap) [tactical-scenario current-scene]
        :else [:div "default"]))
    [:div @(rf/subscribe [:message])]])

@@ -4,6 +4,7 @@
             [perlin2d.core :as p]
             [app.interface.lands :refer [lands]]
             [app.interface.utils :refer [get-only]]
+            [app.interface.character :refer [characters]]
             [clojure.string :as st]))
 
 ; TODO use one perlin noise for humidity and one for elevation to generate more
@@ -43,6 +44,8 @@
   [row-idx col-idx [tile-letter bonus-letter]]
   (base-tile {:row-idx row-idx
               :col-idx col-idx
+              :character-full-name
+              (:full-name (get-only characters :letter-code bonus-letter))
               :land    (get-only lands :letter tile-letter)}))
 
 (defn parse-gridmap-str
@@ -56,21 +59,6 @@
                                  (tile-from-str row-idx col-idx tile-str))
                                (st/split (st/trim line) #" +"))))
           (st/split-lines board-str))))
-
-(def manual-gridmap
-  (parse-gridmap-str
-    "F   M   M   F   F   P   P   W  
-     W   W   M   F   F   P   P   W
-     W   M   F   F   F   P   P   W
-     W   M   M   F   F   P   P   W
-     W   M   M   F   F   F   P   W
-     W   M   M   F   F   F   F   W
-     W   M   M   F   W   F   F   W
-     W   M   M   W   W   W   F   W
-     S   M   S   S   W   F   F   W
-     S   S   S   S   S   F   F   W
-     S   S   S   S   S   F   F   W"))
-
 
 (defn generate-perlin-board
   "Returns 2d array of tile maps."
