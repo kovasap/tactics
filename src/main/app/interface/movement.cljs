@@ -10,9 +10,11 @@
   (+ (abs (- x1 x2))
      (abs (- y1 y2))))
 
+; TODO memoize this
 (defn get-path
   "Returns list of tiles in visited order."
-  [gridmap start-tile end-tile])
+  [gridmap start-tile end-tile]
+  [start-tile end-tile])
 
 (defn get-tiles-left-to-move
   [{:keys [tiles-already-moved] {:keys [air]} :affinities}]
@@ -57,30 +59,40 @@
       (dissoc :moving-character))))
    
 
-(defn move
-  [{:keys [full-name] :as character}
-   {to-row-idx :row-idx to-col-idx :col-idx}
+(defn declare-move-intention
+  [{:keys [full-name]}
+   path
    gridmap]
-  (let [{from-row-idx :row-idx from-col-idx :col-idx :as tile}
-        (get-current-tile gridmap character)]
+  (let [{from-row-idx :row-idx from-col-idx :col-idx :as from-tile} (first path)
+        steps (subvec path 1 (count path))
+        {to-row-idx :row-idx to-col-idx :col-idx :as to-tile} (last path)]
     (-> gridmap
         (clear-legal-moves)
+        ; Add waypoints
+        ((apply comp
+           (for [{path-row-idx :row-idx path-col-idx :col-idx} steps]
+             #(assoc-in % [path-row-idx path-col-idx :waypoint] true))))
         (assoc-in [from-row-idx from-col-idx :intention-character-full-name]
                   nil)
         (assoc-in [to-row-idx to-col-idx :intention-character-full-name]
                   full-name))))
 
 (rf/reg-event-fx
-  :move
-  (undoable "Move")
-  (fn [cofx [_ tile]]
-    {:db (let [{:keys [current-scene-idx moving-character] :as db} (:db cofx)]
+  :declare-move-intention
+  (undoable "Declare move intention")
+  (fn [cofx [_ end-tile]]
+    {:db (let [{:keys [current-scene-idx moving-character] :as db} (:db cofx)
+               gridmap      (get-in db [:scenes current-scene-idx :gridmap])
+               start-tile   (get-current-tile gridmap moving-character)
+               path (get-path gridmap start-tile end-tile)]
            (-> db
                (update-in [:scenes current-scene-idx :gridmap]
-                          (partial move moving-character tile))
+                          (partial declare-move-intention
+                                   moving-character
+                                   path))
                (assoc-in [:characters
                           (:full-name moving-character)
-                          :already-moved?]
-                         true)
+                          :tiles-already-moved]
+                         (dec (count path)))
                (dissoc :moving-character)))
      :fx [[:dispatch [:update-intentions]]]}))

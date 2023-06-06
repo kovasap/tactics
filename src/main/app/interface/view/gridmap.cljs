@@ -13,8 +13,14 @@
 
 
 (defn tile-view
-  [{:keys [land row-idx col-idx character-full-name is-legal-move
-           intention-character-full-name] :as tile}]
+  [{:keys [land
+           row-idx
+           col-idx
+           character-full-name
+           is-legal-move
+           waypoint
+           intention-character-full-name]
+    :as   tile}]
   (let [character (get @(rf/subscribe [:characters-by-full-name])
                        character-full-name)
         intention-character (get @(rf/subscribe [:characters-by-full-name])
@@ -29,7 +35,9 @@
                 :on-mouse-out  #()
                 :on-click      #(cond (and is-legal-move character)
                                       (rf/dispatch [:cancel-move])
-                                      is-legal-move (rf/dispatch [:move tile])
+                                      is-legal-move (rf/dispatch
+                                                      [:declare-move-intention
+                                                       tile])
                                       (and character
                                            (:controlled-by-player? character))
                                       (rf/dispatch [:begin-move character]))}
@@ -44,6 +52,7 @@
        row-idx
        ", "
        col-idx]
+      (if waypoint [:span "wp"] nil)
       [character-view character]
       [intention-character-view intention-character]]]))
 
