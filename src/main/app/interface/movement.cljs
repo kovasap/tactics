@@ -10,6 +10,14 @@
   (+ (abs (- x1 x2))
      (abs (- y1 y2))))
 
+(defn get-path
+  "Returns list of tiles in visited order."
+  [gridmap start-tile end-tile])
+
+(defn get-tiles-left-to-move
+  [{:keys [tiles-already-moved] {:keys [air]} :affinities}]
+  (- air tiles-already-moved))
+
 (defn begin-move
   [character gridmap]
   (let [{cur-row-idx :row-idx cur-col-idx :col-idx} (get-current-tile
@@ -22,7 +30,7 @@
     ; opposed to the raw distance we use here.
     (update-tiles gridmap
                   (fn [{:keys [row-idx col-idx]}]
-                    (> (inc (get-in character [:stats :move]))
+                    (> (inc (get-tiles-left-to-move character))
                        (distance [cur-row-idx cur-col-idx] [row-idx col-idx])))
                   #(assoc % :is-legal-move true))))
 

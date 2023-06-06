@@ -10,8 +10,12 @@
     [{:full-name "Main Character"
       :letter-code "M"
       :controlled-by-player? true
-      :already-moved? false
-      :affinity :fire
-      :stats {:move 3}
+      :tiles-already-moved 0
+      :affinities {:fire 1
+                   :air 3
+                   :earth 2
+                   :water 3
+                   :light 0
+                   :dark 0}
       :image "unit-images/merfolk/citizen.png"
       :animations {:attack []}}]))
