@@ -33,23 +33,38 @@
 
 (rf/reg-event-db
   :commit-intentions
-  (fn [{:keys [current-scene-idx] :as db} _]
-    (-> db
-      ; reset movement status
-      (update
-        :characters
-        (fn [characters]
-          (into {}
-                (for [[full-name character] characters]
-                  [full-name (assoc character :already-moved? false)]))))
-      ; commit movements
-      (update-in
-        [:scenes current-scene-idx :gridmap]
-        (fn [gridmap]
-          (update-tiles
-            gridmap
-            :intention-character-full-name
-            (fn [{:keys [intention-character-full-name] :as tile}]
-              (-> tile
-                  (assoc :character-full-name intention-character-full-name)
-                  (dissoc :intention-character-full-name)))))))))
+  (fn [{:keys [current-scene-idx characters] :as db} _]
+    (let [moved-characters (into #{}
+                                 (for [[full-name {:keys [already-moved?]}]
+                                       characters
+                                       :when already-moved?]
+                                   full-name))]
+      (prn moved-characters)
+      (-> db
+          ; reset movement status
+          (update
+            :characters
+            (fn [characters]
+              (into {}
+                    (for [[full-name character] characters]
+                      [full-name (assoc character :already-moved? false)]))))
+          ; commit movements
+          (update-in
+            [:scenes current-scene-idx :gridmap]
+            (fn [gridmap]
+              (-> gridmap
+                ; remove old positons for moved characters
+                (update-tiles
+                  (fn [{:keys [character-full-name]}]
+                    (moved-characters character-full-name))
+                  (fn [tile]
+                    (dissoc tile :character-full-name)))
+                ; add new positions 
+                (update-tiles
+                  :intention-character-full-name
+                  (fn [{:keys [intention-character-full-name]
+                        :as   tile}]
+                     (-> tile
+                         (assoc :character-full-name
+                                intention-character-full-name)
+                         (dissoc :intention-character-full-name)))))))))))

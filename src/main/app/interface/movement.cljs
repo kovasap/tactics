@@ -59,10 +59,6 @@
         (clear-legal-moves)
         (assoc-in [from-row-idx from-col-idx :intention-character-full-name]
                   nil)
-        ; we may not want to remove the character from the initial tile when
-        ; doing a move intention, not sure yet
-        (assoc-in [from-row-idx from-col-idx :character-full-name]
-                  nil)
         (assoc-in [to-row-idx to-col-idx :intention-character-full-name]
                   full-name))))
 

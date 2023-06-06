@@ -6,7 +6,7 @@
     [:div
      [:span {:style {:color (if controlled-by-player? "blue" "black")}}
       full-name]
-     [:img {:style {:opacity (if is-intention? 0.6 1.0)}
+     [:img {:style {:opacity (if is-intention? 0.2 1.0)}
             :src image}]]
     nil))
 
