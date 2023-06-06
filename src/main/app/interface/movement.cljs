@@ -1,5 +1,6 @@
 (ns app.interface.movement
   (:require [re-frame.core :as rf]
+            [day8.re-frame.undo :as undo :refer [undoable]]  
             [app.interface.gridmap :refer [update-tiles get-current-tile]]))
 
 ; See this for a way to find paths as well!
@@ -27,11 +28,14 @@
 
 (rf/reg-event-db
   :begin-move
+  (undoable "Begin Move")
   (fn [{:keys [current-scene-idx] :as db} [_ character]]
-    (-> db
-      (update-in [:scenes current-scene-idx :gridmap]
-                 (partial begin-move character))
-      (assoc :moving-character character))))
+    (if (:already-moved? character)
+      (assoc db :message "Character has already moved!")
+      (-> db
+        (update-in [:scenes current-scene-idx :gridmap]
+                   (partial begin-move character))
+        (assoc :moving-character character)))))
 
 (defn clear-legal-moves
   [gridmap]
@@ -53,15 +57,26 @@
         (get-current-tile gridmap character)]
     (-> gridmap
         (clear-legal-moves)
-        (assoc-in [from-row-idx from-col-idx :character-full-name] nil)
-        (assoc-in [to-row-idx to-col-idx :character-full-name] full-name))))
+        (assoc-in [from-row-idx from-col-idx :intention-character-full-name]
+                  nil)
+        ; we may not want to remove the character from the initial tile when
+        ; doing a move intention, not sure yet
+        (assoc-in [from-row-idx from-col-idx :character-full-name]
+                  nil)
+        (assoc-in [to-row-idx to-col-idx :intention-character-full-name]
+                  full-name))))
 
-(rf/reg-event-db
+(rf/reg-event-fx
   :move
-  (fn [{:keys [current-scene-idx moving-character] :as db} [_ tile]]
-    (-> db
-      (update-in [:scenes current-scene-idx :gridmap]
-                 (partial move moving-character tile))
-      (dissoc :moving-character))))
-
-
+  (undoable "Move")
+  (fn [cofx [_ tile]]
+    {:db (let [{:keys [current-scene-idx moving-character] :as db} (:db cofx)]
+           (-> db
+               (update-in [:scenes current-scene-idx :gridmap]
+                          (partial move moving-character tile))
+               (assoc-in [:characters
+                          (:full-name moving-character)
+                          :already-moved?]
+                         true)
+               (dissoc :moving-character)))
+     :fx [[:dispatch [:update-intentions]]]}))

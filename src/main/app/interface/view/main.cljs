@@ -47,6 +47,8 @@
      "Reset App"]
     [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:advance-scene])}
      "Next Scene"]
+    [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:commit-intentions])}
+     "End turn"]
     [undo-button]]
    (let [current-scene @(rf/subscribe [:current-scene])]
      (cond

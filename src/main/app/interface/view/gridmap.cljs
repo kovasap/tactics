@@ -2,7 +2,9 @@
   (:require [re-frame.core :as rf]
             [reagent.core :as r]
             [clojure.string :as st]
-            [app.interface.view.character :refer [character-view]]
+            [app.interface.view.character
+             :refer
+             [character-view intention-character-view]]
             [app.interface.config :refer [debug]]
             [app.interface.utils :refer [get-only]]))
 
@@ -11,9 +13,12 @@
 
 
 (defn tile-view
-  [{:keys [land row-idx col-idx character-full-name is-legal-move] :as tile}]
+  [{:keys [land row-idx col-idx character-full-name is-legal-move
+           intention-character-full-name] :as tile}]
   (let [character (get @(rf/subscribe [:characters-by-full-name])
-                       character-full-name)]
+                       character-full-name)
+        intention-character (get @(rf/subscribe [:characters-by-full-name])
+                                 intention-character-full-name)]
     [:div.tile {:style         {:font-size    "12px"
                                 :text-align   "center"
                                 :height       tile-size
@@ -25,8 +30,9 @@
                 :on-click      #(cond (and is-legal-move character)
                                       (rf/dispatch [:cancel-move])
                                       is-legal-move (rf/dispatch [:move tile])
-                                      character     (rf/dispatch [:begin-move
-                                                                  character]))}
+                                      (and character
+                                           (:controlled-by-player? character))
+                                      (rf/dispatch [:begin-move character]))}
      [:div.background {:style (merge (:style land)
                                      {:width    "100%"
                                       :height   "100%"
@@ -38,7 +44,8 @@
        row-idx
        ", "
        col-idx]
-      [character-view character]]]))
+      [character-view character]
+      [intention-character-view intention-character]]]))
 
 
 (defn gridmap-view

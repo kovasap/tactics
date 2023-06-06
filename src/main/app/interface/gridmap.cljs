@@ -4,7 +4,9 @@
             [perlin2d.core :as p]
             [app.interface.lands :refer [lands]]
             [app.interface.utils :refer [get-only]]
-            [app.interface.character :refer [characters]]
+            ; Using starting characters here is a bit dangerous, we should
+            ; probably use the characters in the app db instead.
+            [app.interface.character :refer [starting-characters]]
             [clojure.string :as st]))
 
 ; TODO use one perlin noise for humidity and one for elevation to generate more
@@ -42,11 +44,13 @@
 
 (defn tile-from-str
   [row-idx col-idx [tile-letter bonus-letter]]
-  (base-tile {:row-idx row-idx
-              :col-idx col-idx
-              :character-full-name
-              (:full-name (get-only characters :letter-code bonus-letter))
-              :land    (get-only lands :letter tile-letter)}))
+  (base-tile
+    {:row-idx row-idx
+     :col-idx col-idx
+     :character-full-name (:full-name (get-only (vals starting-characters)
+                                                :letter-code
+                                                bonus-letter))
+     :land    (get-only lands :letter tile-letter)}))
 
 (defn parse-gridmap-str
   "Returns 2d array of tile maps."

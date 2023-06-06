@@ -9,8 +9,10 @@
             [app.interface.view.main :refer [main]]
             [app.interface.utils :refer [get-only]]
             [app.interface.gridmap :refer [parse-gridmap-str]]
+            [app.interface.character :refer [starting-characters]]
             ; Included just so reframe events are picked up
             [app.interface.movement]
+            [app.interface.intentions]
             [cljs.pprint]
             [taoensso.timbre :as log]))
 
@@ -35,9 +37,15 @@
   :app/setup
   (fn [db _]
     (-> db
-        (assoc :scenes [{:title :start} scene-one])
-        (assoc :characters []) 
+        (assoc :scenes [; {:title :start}
+                        scene-one])
+        (assoc :characters starting-characters) 
         (assoc :current-scene-idx 0))))
+
+(rf/reg-sub
+  :characters-by-full-name
+  (fn [db _]
+    (:characters db)))
 
 (rf/reg-event-db
   :advance-scene
