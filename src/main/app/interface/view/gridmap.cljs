@@ -7,6 +7,9 @@
             [app.interface.utils :refer [get-only]]))
 
 
+(def tile-size "120px")
+
+
 (defn tile-view
   [{:keys [land
            row-idx
@@ -17,8 +20,8 @@
     [:div.tile
      {:style         {:font-size  "12px"
                       :text-align "center"
-                      :height "120px"
-                      :width "120px"
+                      :height tile-size
+                      :width tile-size
                       :aspect-ratio "1"
                       :position   "relative"}
       :on-mouse-over #()
@@ -46,7 +49,7 @@
            {:style {:display  "grid"
                     :grid-template-columns (st/join " "
                                                     (for [_ (first gridmap)]
-                                                      "1fr"))
+                                                      tile-size))
                     :grid-gap "1px"}}]
           (reduce concat
             (for [column gridmap] (for [tile column] (tile-view tile)))))))

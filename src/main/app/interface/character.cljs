@@ -1,6 +1,9 @@
 (ns app.interface.character
   (:require [re-frame.core :as rf]))
 
+; Sprites and animations can be found at
+; https://github.com/wesnoth/wesnoth/tree/master/data/core/images/units
+
 (def characters
   [{:full-name "Main Character"
     :letter-code "M"
