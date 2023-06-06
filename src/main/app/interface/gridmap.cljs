@@ -70,3 +70,31 @@
                   (base-tile {:row-idx row-idx
                               :col-idx col-idx
                               :land    (get-perlin-land row-idx col-idx)}))))))
+
+(defn update-tiles
+  "Applies update-fn to all tiles in the gridmap for which tile-selector
+  returns true. Returns a new gridmap."
+  [gridmap tile-selector update-fn]
+  (into [] (for [row gridmap]
+             (into [] (for [tile row]
+                        (if (tile-selector tile)
+                          (update-fn tile)
+                          tile))))))
+
+(defn get-tiles
+  "Get all tiles for which tile-selector is true."
+  [gridmap tile-selector]
+  (reduce concat
+    (for [row gridmap]
+      (for [tile row
+            :when (tile-selector tile)]
+        tile))))
+
+(defn get-tile
+  [gridmap tile-selector]
+  (first (get-tiles gridmap tile-selector)))
+
+(defn get-current-tile
+  [gridmap {:keys [full-name]}]
+  (get-tile gridmap (fn [{:keys [character-full-name]}]
+                      (= full-name character-full-name))))

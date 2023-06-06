@@ -9,6 +9,8 @@
             [app.interface.view.main :refer [main]]
             [app.interface.utils :refer [get-only]]
             [app.interface.gridmap :refer [parse-gridmap-str]]
+            ; Included just so reframe events are picked up
+            [app.interface.movement]
             [cljs.pprint]
             [taoensso.timbre :as log]))
 
