@@ -18,6 +18,13 @@ spirit/demon that will sometimes warp what they see to serve their own
 intentions.
 
 
+## Lore / World
+
+Characters have affinities for different elements, as described at
+https://github.com/kovasap/journey_game/blob/master/spec/spec.md#elements.  This
+affinity could be used instead of "class" when character building.
+
+
 ## Gameplay
 
 Grid based tactics.
