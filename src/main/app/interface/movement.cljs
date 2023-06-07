@@ -7,15 +7,18 @@
 ; See this for a way to find paths as well!
 ; https://noobtuts.com/clojure/manhattan-distance-and-path
 (defn distance
-  [[x1 y1] [x2 y2]]
-  (+ (abs (- x1 x2))
-     (abs (- y1 y2))))
+  [{from-row-idx :row-idx from-col-idx :col-idx}
+   {to-row-idx :row-idx to-col-idx :col-idx}]
+  (+ (abs (- from-row-idx to-row-idx))
+     (abs (- from-col-idx to-col-idx))))
 
 (defn get-steps-to-move-to
-  [{{:keys [steps-to-move-through]} :land}]
-  (if (nil? steps-to-move-through)
-     100 ; technically infinity, this is impassible
-     steps-to-move-through))
+  [{{:keys [steps-to-move-through]} :land
+    :keys [character-full-name]}]
+  (cond
+    (nil? steps-to-move-through) 100 ; technically infinity, this is impassible
+    character-full-name 100 ; cannot move to a tile with a character!
+    :else steps-to-move-through))
 
 (defn get-path-steps
   [path]
@@ -46,16 +49,13 @@
 
 (defn begin-move
   [character gridmap]
-  (let [{from-row-idx :row-idx from-col-idx :col-idx :as from-tile}
-        (get-current-tile gridmap character)]
+  (let [from-tile (get-current-tile gridmap character)]
     (update-tiles gridmap
                   (fn [tile]
                     (> (inc (get-tiles-left-to-move character))
+                       ; alternative: as the bird flies distance
+                       ; (distance from-tile tile)
                        (get-path-steps (get-path gridmap from-tile tile))))
-                  #_(fn [{:keys [row-idx col-idx]}]
-                      (> (inc (get-tiles-left-to-move character))
-                         (distance [from-row-idx from-col-idx]
-                                   [row-idx col-idx])))
                   #(assoc % :is-legal-move true))))
 
 (rf/reg-event-db

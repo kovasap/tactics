@@ -62,6 +62,7 @@
               (update-tiles (partial character-moved?-m gridmap)
                             (fn [tile] (dissoc tile :character-full-name)))
               ; remove waypoints
+              ; TODO if hitting a waypoints triggers any effect, do it here
               (update-tiles (fn [{:keys [waypoint]}] waypoint)
                             (fn [tile] (dissoc tile :waypoint)))
               ; add new positions
