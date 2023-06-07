@@ -114,5 +114,14 @@
                           (:full-name moving-character)
                           :tiles-already-moved]
                          (dec (count path)))
+               (assoc-in [:characters
+                          (:full-name moving-character)
+                          :has-intention?]
+                         true)
                (dissoc :moving-character)))
      :fx [[:dispatch [:update-intentions]]]}))
+
+(rf/reg-sub
+  :moving-character
+  (fn [db _]
+    (:moving-character db)))

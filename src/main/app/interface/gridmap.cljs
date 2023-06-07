@@ -111,3 +111,16 @@
     (for [[row-idx-shift col-idx-shift] [[1 0] [0 1] [-1 0] [0 -1]]]
       (get-in gridmap [(+ row-idx row-idx-shift) (+ col-idx col-idx-shift)]))))
     
+
+(rf/reg-sub
+  :current-gridmap
+  (fn [db _]
+    (:gridmap @(rf/subscribe [:current-scene]))))
+
+(rf/reg-sub
+ :characters-current-tile
+ (fn [_ [_ full-name]]
+   (get-tile @(rf/subscribe [:current-gridmap])
+             (fn [{:keys [character-full-name]}]
+               (= full-name character-full-name)))))
+   

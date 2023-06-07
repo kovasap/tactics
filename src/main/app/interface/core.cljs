@@ -42,11 +42,6 @@
         (assoc :characters starting-characters) 
         (assoc :current-scene-idx 0))))
 
-(rf/reg-sub
-  :characters-by-full-name
-  (fn [db _]
-    (:characters db)))
-
 (rf/reg-event-db
   :advance-scene
   (undoable "Advancing scene")
@@ -57,11 +52,6 @@
   :current-scene
   (fn [db _]
     (get (:scenes db) (:current-scene-idx db))))
-
-(rf/reg-sub
-  :current-gridmap
-  (fn [db _]
-    (:gridmap @(rf/subscribe [:current-scene]))))
 
 (rf/reg-event-db
   :message

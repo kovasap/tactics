@@ -52,7 +52,8 @@
               (fn [characters]
                 (into {}
                       (for [[full-name character] characters]
-                        [full-name (assoc character :tiles-already-moved 0)]))))
+                        [full-name (assoc character :tiles-already-moved 0
+                                                    :has-intention? false)]))))
       ; commit movements
       (update-in
         [:scenes current-scene-idx :gridmap]

@@ -11,6 +11,7 @@
       :letter-code "M"
       :controlled-by-player? true
       :tiles-already-moved 0
+      :has-intention? false
       :affinities {:fire 1
                    :air 3
                    :earth 2
@@ -19,3 +20,8 @@
                    :dark 0}
       :image "unit-images/merfolk/citizen.png"
       :animations {:attack []}}]))
+
+(rf/reg-sub
+ :characters-by-full-name
+ (fn [db _]
+   (:characters db)))

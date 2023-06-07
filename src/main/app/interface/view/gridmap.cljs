@@ -33,14 +33,9 @@
                                 :position     "relative"}
                 :on-mouse-over #()
                 :on-mouse-out  #()
-                :on-click      #(cond (and is-legal-move character)
-                                      (rf/dispatch [:cancel-move])
-                                      is-legal-move (rf/dispatch
+                :on-click      #(cond is-legal-move (rf/dispatch
                                                       [:declare-move-intention
-                                                       tile])
-                                      (and character
-                                           (:controlled-by-player? character))
-                                      (rf/dispatch [:begin-move character]))}
+                                                       tile]))}
      [:div.background {:style (merge (:style land)
                                      {:width    "100%"
                                       :height   "100%"
