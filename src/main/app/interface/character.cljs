@@ -2,6 +2,12 @@
   (:require [re-frame.core :as rf]
             [app.interface.utils :refer [associate-by]]))
 
+(def weapons
+  {:sword
+   {:image ""
+    :range 1
+    :damage 2}})
+
 ; Sprites and animations can be found at
 ; https://github.com/wesnoth/wesnoth/tree/master/data/core/images/units
 
@@ -12,8 +18,9 @@
       :controlled-by-player? true
       :tiles-already-moved 0
       :has-intention? false
+      :equipped-weapon :sword
       :affinities {:fire 1
-                   :air 3
+                   :air 8
                    :earth 2
                    :water 3
                    :light 0
@@ -24,6 +31,7 @@
       :letter-code "1"
       :controlled-by-player? false
       :tiles-already-moved 0
+      :equipped-weapon :sword
       :has-intention? false
       :affinities {:fire 1
                    :air 3

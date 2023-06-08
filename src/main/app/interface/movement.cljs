@@ -4,14 +4,6 @@
             [astar.core :refer [route]]
             [app.interface.gridmap :refer [get-tiles update-tiles get-characters-current-tile get-adjacent-tiles]]))
 
-; See this for a way to find paths as well!
-; https://noobtuts.com/clojure/manhattan-distance-and-path
-(defn distance
-  [{from-row-idx :row-idx from-col-idx :col-idx}
-   {to-row-idx :row-idx to-col-idx :col-idx}]
-  (+ (abs (- from-row-idx to-row-idx))
-     (abs (- from-col-idx to-col-idx))))
-
 (defn get-steps-to-move-to
   [{{:keys [steps-to-move-through]} :land
     :keys [character-full-name]}]

@@ -43,6 +43,7 @@
                    #(dissoc % :intention-character-full-name))
      ; Clear old waypoints
      (update-tiles #(= full-name (:waypoint-for %)) #(dissoc % :waypoint-for))
+     ; Make AI movement intentions.
      ((partial declare-move-intention
                character
                (truncate-occupied-path-steps
@@ -78,35 +79,43 @@
  (memoize (fn [gridmap {:keys [character-full-name]}]
            ((get-moved-character-full-names gridmap) character-full-name))))
 
+(defn commit-movements
+  [gridmap]
+  (-> gridmap
+      ; remove old positons for moved characters
+      (update-tiles (partial character-moved? gridmap)
+                    (fn [tile] (dissoc tile :character-full-name)))
+      ; remove waypoints
+      ; TODO if hitting a waypoints triggers any effect, do it here
+      (update-tiles (fn [{:keys [waypoint-for]}] waypoint-for)
+                    (fn [tile] (dissoc tile :waypoint-for)))
+      ; add new positions
+      (update-tiles
+        :intention-character-full-name
+        (fn [{:keys [intention-character-full-name] :as tile}]
+          (-> tile
+              (assoc :character-full-name
+                     intention-character-full-name)
+              (dissoc :intention-character-full-name))))))
+
+(defn reset-movement-status
+  [characters]
+  (into {}
+        (for [[full-name character] characters]
+          [full-name (assoc character :tiles-already-moved 0
+                                      :has-intention? false)])))
+
+; TODO make it so that all the :under-attack-by characters are attacked by
+; their attackers
+(defn commit-attacks
+  [characters]
+  characters)
+
 (rf/reg-event-db
   :commit-intentions
   (fn [{:keys [current-scene-idx] :as db} _]
     (->
       db
-      ; reset movement status
-      (update :characters
-              (fn [characters]
-                (into {}
-                      (for [[full-name character] characters]
-                        [full-name (assoc character :tiles-already-moved 0
-                                                    :has-intention? false)]))))
-      ; commit movements
-      (update-in
-        [:scenes current-scene-idx :gridmap]
-        (fn [gridmap]
-          (-> gridmap
-              ; remove old positons for moved characters
-              (update-tiles (partial character-moved? gridmap)
-                            (fn [tile] (dissoc tile :character-full-name)))
-              ; remove waypoints
-              ; TODO if hitting a waypoints triggers any effect, do it here
-              (update-tiles (fn [{:keys [waypoint-for]}] waypoint-for)
-                            (fn [tile] (dissoc tile :waypoint-for)))
-              ; add new positions
-              (update-tiles
-                :intention-character-full-name
-                (fn [{:keys [intention-character-full-name] :as tile}]
-                  (-> tile
-                      (assoc :character-full-name
-                             intention-character-full-name)
-                      (dissoc :intention-character-full-name))))))))))
+      (update :characters reset-movement-status)
+      (update-in [:scenes current-scene-idx :gridmap] commit-movements)
+      (update :characters commit-attacks))))

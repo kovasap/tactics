@@ -12,6 +12,7 @@
             [app.interface.character :refer [starting-characters]]
             ; Included just so reframe events are picked up
             [app.interface.movement]
+            [app.interface.attacking]
             [app.interface.intentions]
             [cljs.pprint]
             [taoensso.timbre :as log]))
