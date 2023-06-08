@@ -100,7 +100,7 @@
   [gridmap tile-selector]
   (first (get-tiles gridmap tile-selector)))
 
-(defn get-current-tile
+(defn get-characters-current-tile
   [gridmap {:keys [full-name]}]
   (get-tile gridmap (fn [{:keys [character-full-name]}]
                       (= full-name character-full-name))))
@@ -118,9 +118,7 @@
     (:gridmap @(rf/subscribe [:current-scene]))))
 
 (rf/reg-sub
- :characters-current-tile
- (fn [_ [_ full-name]]
-   (get-tile @(rf/subscribe [:current-gridmap])
-             (fn [{:keys [character-full-name]}]
-               (= full-name character-full-name)))))
-   
+  :characters-current-tile
+  (fn [_ [_ full-name]]
+   (get-characters-current-tile @(rf/subscribe [:current-gridmap])
+                                {:full-name full-name})))

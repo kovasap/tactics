@@ -7,7 +7,8 @@
   [{:keys [full-name image controlled-by-player? has-intention?] :as character} is-intention?]
   (let [hover-key [full-name is-intention?]]
     (if character
-      [:div {:on-mouse-over #(if (= has-intention? is-intention?)
+      [:div {:on-mouse-over #(if (and controlled-by-player?
+                                      (= has-intention? is-intention?))
                                (swap! char-hover-state
                                       (fn [state]
                                          (assoc state

@@ -2,7 +2,7 @@
   (:require [re-frame.core :as rf]
             [day8.re-frame.undo :as undo :refer [undoable]]  
             [astar.core :refer [route]]
-            [app.interface.gridmap :refer [get-tiles update-tiles get-current-tile get-adjacent-tiles]]))
+            [app.interface.gridmap :refer [get-tiles update-tiles get-characters-current-tile get-adjacent-tiles]]))
 
 ; See this for a way to find paths as well!
 ; https://noobtuts.com/clojure/manhattan-distance-and-path
@@ -20,7 +20,7 @@
     character-full-name 100 ; cannot move to a tile with a character!
     :else steps-to-move-through))
 
-(defn get-path-steps
+(defn get-number-of-path-steps
   [path]
   (reduce + (for [tile (rest path)] (get-steps-to-move-to tile))))
 
@@ -32,15 +32,21 @@
                   [tile (get-adjacent-tiles gridmap tile)]))
    :dist  (fn [_ to-tile] (get-steps-to-move-to to-tile))})
 
-; TODO memoize this
-(defn get-path
-  "Returns list of tiles in visited order."
-  [gridmap start-tile end-tile]
-  (let [{:keys [graph h dist]} (gridmap->astar-args gridmap)]
-    (vec (conj (route graph dist h start-tile end-tile)
-               start-tile))))
 
-(def get-path-m (memoize get-path))
+(def get-path
+ "Returns list of tiles in visited order."
+ (memoize
+  (fn [gridmap start-tile end-tile]
+   (let [{:keys [graph h dist]} (gridmap->astar-args gridmap)]
+    (vec (conj (route graph dist h start-tile end-tile) start-tile))))))
+
+
+(defn truncate-path
+  "Takes away tiles from the end of the path until it is under steps."
+  [path steps]
+  (if (>= steps (get-number-of-path-steps path))
+    (vec path)
+    (truncate-path (butlast path) steps))) 
   
 
 (defn get-tiles-left-to-move
@@ -48,15 +54,16 @@
   (- air tiles-already-moved))
 
 (defn begin-move
-  [character gridmap]
-  (let [from-tile (get-current-tile gridmap character)]
-    (update-tiles gridmap
-                  (fn [tile]
-                    (> (inc (get-tiles-left-to-move character))
-                       ; alternative: as the bird flies distance
-                       ; (distance from-tile tile)
-                       (get-path-steps (get-path gridmap from-tile tile))))
-                  #(assoc % :is-legal-move true))))
+ [character gridmap]
+ (let [from-tile (get-characters-current-tile gridmap character)]
+  (update-tiles
+   gridmap
+   (fn [tile]
+    (> (inc (get-tiles-left-to-move character))
+       ; alternative: as the bird flies distance
+       ; (distance from-tile tile)
+       (get-number-of-path-steps (get-path gridmap from-tile tile))))
+   #(assoc % :is-legal-move true))))
 
 (rf/reg-event-db
   :begin-move
@@ -80,22 +87,19 @@
    
 
 (defn declare-move-intention
-  [{:keys [full-name]}
-   path
-   gridmap]
-  (let [{from-row-idx :row-idx from-col-idx :col-idx :as from-tile} (first path)
-        steps (subvec path 1 (dec (count path)))
-        {to-row-idx :row-idx to-col-idx :col-idx :as to-tile} (last path)]
-    (-> gridmap
-        (clear-legal-moves)
-        ; Add waypoints
-        ((apply comp
-           (for [{path-row-idx :row-idx path-col-idx :col-idx} steps]
-             #(assoc-in % [path-row-idx path-col-idx :waypoint] true))))
-        (assoc-in [from-row-idx from-col-idx :intention-character-full-name]
-                  nil)
-        (assoc-in [to-row-idx to-col-idx :intention-character-full-name]
-                  full-name))))
+ [{:keys [full-name]} path gridmap]
+ (let [{from-row-idx :row-idx from-col-idx :col-idx} (first path)
+       steps (subvec path 1 (dec (count path)))
+       {to-row-idx :row-idx to-col-idx :col-idx} (last path)]
+  (-> gridmap
+      (clear-legal-moves)
+      ; Add waypoints
+      ((apply comp
+        (for [{path-row-idx :row-idx path-col-idx :col-idx} steps]
+         #(assoc-in % [path-row-idx path-col-idx :waypoint-for] full-name))))
+      (assoc-in [from-row-idx from-col-idx :intention-character-full-name] nil)
+      (assoc-in [to-row-idx to-col-idx :intention-character-full-name]
+                full-name))))
 
 (rf/reg-event-fx
   :declare-move-intention
@@ -103,8 +107,8 @@
   (fn [cofx [_ end-tile]]
     {:db (let [{:keys [current-scene-idx moving-character] :as db} (:db cofx)
                gridmap      (get-in db [:scenes current-scene-idx :gridmap])
-               start-tile   (get-current-tile gridmap moving-character)
-               path (get-path-m gridmap start-tile end-tile)]
+               start-tile   (get-characters-current-tile gridmap moving-character)
+               path (get-path gridmap start-tile end-tile)]
            (-> db
                (update-in [:scenes current-scene-idx :gridmap]
                           (partial declare-move-intention

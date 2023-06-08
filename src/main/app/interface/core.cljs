@@ -26,7 +26,7 @@
                W   M   F   F   F   P   P   W
                W   M   M   F   F   P   P   W
                W   M   M   F   F   F   P   W
-               W   M   M   F   F   F   F   W
+               W   M   M   F   F1  F   F   W
                W   M   M   F   W   F   F   W
                W   M   M   W   W   W   F   W
                S   M   S   S   W   F   F   W

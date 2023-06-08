@@ -18,7 +18,7 @@
            col-idx
            character-full-name
            is-legal-move
-           waypoint
+           waypoint-for
            intention-character-full-name]
     :as   tile}]
   (let [character (get @(rf/subscribe [:characters-by-full-name])
@@ -47,7 +47,7 @@
        row-idx
        ", "
        col-idx]
-      (if waypoint [:span "wp"] nil)
+      (if waypoint-for [:span "wp"] nil)
       [character-view character]
       [intention-character-view intention-character]]]))
 
