@@ -8,8 +8,7 @@
             [app.interface.sente :refer [send-state-to-server!]]
             [app.interface.view.main :refer [main]]
             [app.interface.utils :refer [get-only]]
-            [app.interface.gridmap :refer [parse-gridmap-str]]
-            [app.interface.character :refer [starting-characters]]
+            [app.interface.initial-db :refer [initial-db]]
             ; Included just so reframe events are picked up
             [app.interface.movement]
             [app.interface.attacking]
@@ -20,28 +19,16 @@
 ;; ----------------------------------------------------------------------------
 ;; Setup
 
-(def scene-one
-  {:gridmap (parse-gridmap-str 
-              "FM  M   M   F   F   P   P   W  
-               W   W   M   F   F   P   P   W
-               W   M   F   F   F   P   P   W
-               W   M   M   F   F   P   P   W
-               W   M   M   F   F   F   P   W
-               W   M   M   F   F1  F   F   W
-               W   M   M   F   W   F   F   W
-               W   M   M   W   W   W   F   W
-               S   M   S   S   W   F   F   W
-               S   S   S   S   S   F   F   W
-               S   S   S   S   S   F   F   W")})
-
 (rf/reg-event-db
   :app/setup
-  (fn [db _]
-    (-> db
-        (assoc :scenes [; {:title :start}
-                        scene-one])
-        (assoc :characters starting-characters) 
-        (assoc :current-scene-idx 0))))
+  (fn [_ _]
+    initial-db))
+    
+
+(rf/reg-sub
+ :characters-by-full-name
+ (fn [db _]
+   (:characters db)))
 
 (rf/reg-event-db
   :advance-scene

@@ -117,6 +117,42 @@
                (dissoc :moving-character)))
      :fx [[:dispatch [:update-intentions]]]}))
 
+
+(defn get-moved-character-full-names
+  [gridmap]
+  (into #{} (map :intention-character-full-name
+              (get-tiles gridmap :intention-character-full-name))))
+
+(def character-moved?
+ (memoize (fn [gridmap {:keys [character-full-name]}]
+           ((get-moved-character-full-names gridmap) character-full-name))))
+
+(defn commit-movements
+  [gridmap]
+  (-> gridmap
+      ; remove old positons for moved characters
+      (update-tiles (partial character-moved? gridmap)
+                    (fn [tile] (dissoc tile :character-full-name)))
+      ; remove waypoints
+      ; TODO if hitting a waypoints triggers any effect, do it here
+      (update-tiles (fn [{:keys [waypoint-for]}] waypoint-for)
+                    (fn [tile] (dissoc tile :waypoint-for)))
+      ; add new positions
+      (update-tiles
+        :intention-character-full-name
+        (fn [{:keys [intention-character-full-name] :as tile}]
+          (-> tile
+              (assoc :character-full-name
+                     intention-character-full-name)
+              (dissoc :intention-character-full-name))))))
+
+(defn reset-movement-status
+  [characters]
+  (into {}
+        (for [[full-name character] characters]
+          [full-name (assoc character :tiles-already-moved 0
+                                      :has-intention? false)])))
+
 (rf/reg-sub
   :moving-character
   (fn [db _]

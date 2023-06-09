@@ -4,9 +4,6 @@
             [perlin2d.core :as p]
             [app.interface.lands :refer [lands]]
             [app.interface.utils :refer [get-only]]
-            ; Using starting characters here is a bit dangerous, we should
-            ; probably use the characters in the app db instead.
-            [app.interface.character :refer [starting-characters]]
             [clojure.string :as st]))
 
 ; TODO use one perlin noise for humidity and one for elevation to generate more
@@ -37,32 +34,31 @@
 
 (defn base-tile
   [args]
-  (merge {:row-idx          nil
-          :col-idx          nil
-          :land             nil}
+  (merge {:row-idx nil
+          :col-idx nil
+          :land    nil}
          args))
 
 (defn tile-from-str
-  [row-idx col-idx [tile-letter bonus-letter]]
+  [row-idx col-idx [tile-letter bonus-letter] characters-by-letter-code]
   (base-tile
     {:row-idx row-idx
      :col-idx col-idx
-     :character-full-name (:full-name (get-only (vals starting-characters)
-                                                :letter-code
-                                                bonus-letter))
+     :character-full-name (:full-name (characters-by-letter-code bonus-letter))
      :land    (get-only lands :letter tile-letter)}))
 
 (defn parse-gridmap-str
   "Returns 2d array of tile maps."
-  [board-str]
+  [gridmap-str characters-by-letter-code]
   (into []
         (map-indexed
           (fn [row-idx line]
             (into []
                   (map-indexed (fn [col-idx tile-str]
-                                 (tile-from-str row-idx col-idx tile-str))
+                                 (tile-from-str row-idx col-idx tile-str
+                                                characters-by-letter-code))
                                (st/split (st/trim line) #" +"))))
-          (st/split-lines board-str))))
+          (st/split-lines gridmap-str))))
 
 (defn generate-perlin-board
   "Returns 2d array of tile maps."
