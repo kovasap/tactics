@@ -53,3 +53,14 @@
 (defn intention-character-view
   [character]
   (common-character-view character true))
+
+; TODO show table like
+;  air    |  move
+;         | dodge
+; earth   | block
+;         |  ...
+; etc.
+; Turn health bar/ratio red if the character can be one shot by an enemy on the
+; map.
+(defn character-stats-view
+  [character])
