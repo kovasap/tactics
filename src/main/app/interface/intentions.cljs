@@ -1,17 +1,22 @@
 (ns app.interface.intentions
-  (:require [re-frame.core :as rf]
-            [app.interface.movement
-             :refer
-             [get-path
-              declare-move-intention
-              truncate-path
-              get-tiles-left-to-move
-              reset-movement-status
-              commit-movements]]
-            [app.interface.attacking :refer [commit-attacks tile-in-attack-range?]]
-            [app.interface.gridmap
-             :refer
-             [get-adjacent-tiles get-characters-current-tile update-tiles get-tiles]]))
+  (:require
+    [re-frame.core :as rf]
+    [app.interface.movement
+     :refer
+     [get-path
+      declare-move-intention
+      truncate-path
+      get-tiles-left-to-move
+      reset-movement-status
+      commit-movements]]
+    [app.interface.attacking :refer [commit-attacks tile-in-attack-range?]]
+    [app.interface.gridmap
+     :refer
+     [get-adjacent-tiles
+      get-characters-current-tile
+      get-characters-current-intention-tile
+      update-tiles
+      get-tiles]]))
 
 ; TODO add "aggresive" "cautious" and other "personalities" to the AI movement
 ; potentially depending on their element affinity.
@@ -69,12 +74,20 @@
 (defn get-attack-target-full-name
   [gridmap attacker]
   ; TODO maybe make more intelligent target selection?
-  (first
-    (for [{:keys [intention-character-full-name character-full-name]}
-          (get-tiles gridmap (partial tile-in-attack-range? attacker gridmap))
-          :let  [target (or intention-character-full-name character-full-name)]
-          :when (not (nil? target))]
-      target)))
+  #p
+   (first (for [{:keys [intention-character-full-name character-full-name]}
+                (get-tiles
+                  gridmap
+                  (partial tile-in-attack-range?
+                           attacker
+                           (or (get-characters-current-intention-tile gridmap
+                                                                      attacker)
+                               (get-characters-current-tile gridmap attacker))
+                           gridmap))
+                :let  [target (or intention-character-full-name
+                                  character-full-name)]
+                :when (not (nil? target))]
+            target)))
 
 (defn update-attack-intentions
   "Mark all player characters :under-attack-by adjacent enemies."

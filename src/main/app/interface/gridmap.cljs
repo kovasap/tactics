@@ -101,6 +101,11 @@
   (get-tile gridmap (fn [{:keys [character-full-name]}]
                       (= full-name character-full-name))))
 
+(defn get-characters-current-intention-tile
+  [gridmap {:keys [full-name]}]
+  (get-tile gridmap (fn [{:keys [intention-character-full-name]}]
+                      (= full-name intention-character-full-name))))
+
 (defn get-adjacent-tiles
   [gridmap {:keys [row-idx col-idx]}]
   (filter #(not (nil? %))

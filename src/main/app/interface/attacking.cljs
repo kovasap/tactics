@@ -16,15 +16,18 @@
   (:range (equipped-weapon weapons)))
 
 (defn tile-in-attack-range?
-  [character gridmap tile]
+  [character character-tile gridmap tile]
   (> (inc (get-attack-range character))
-     (distance (get-characters-current-tile gridmap character) tile)
+     (distance character-tile tile)
      0))
   
 (defn begin-attack
   [character gridmap]
   (update-tiles gridmap
-                (partial tile-in-attack-range? character gridmap)
+                (partial tile-in-attack-range?
+                         (get-characters-current-tile gridmap character)
+                         character
+                         gridmap)
                 #(assoc % :is-legal-attack true)))
 
 (rf/reg-event-db
