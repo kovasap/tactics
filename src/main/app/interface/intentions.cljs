@@ -36,7 +36,7 @@
     (truncate-occupied-path-steps (butlast path))
     (vec path)))
 
-(defn update-move-intentions
+(defn update-move-intention
  "Returns a gridmap with :intention-character-full-name tile keys filled in."
  [{:keys [full-name] :as character} characters-by-full-name gridmap]
  (-> gridmap
@@ -63,34 +63,40 @@
   ((apply comp
     (for [character (vals characters-by-full-name)
           :when     (not (:controlled-by-player? character))]
-     (partial update-move-intentions character characters-by-full-name)))
+     (partial update-move-intention character characters-by-full-name)))
    gridmap))
 
 (defn get-attack-target-full-name
-  [gridmap character]
+  [gridmap attacker]
   ; TODO maybe make more intelligent target selection?
-  (first (for [{:keys [character-full-name]}
-               (get-tiles gridmap
-                          (partial tile-in-attack-range? character gridmap))
-               :let  [target character-full-name]
-               :when (not (nil? target))]
-           target)))
+  (first
+    (for [{:keys [intention-character-full-name character-full-name]}
+          (get-tiles gridmap (partial tile-in-attack-range? attacker gridmap))
+          :let  [target (or intention-character-full-name character-full-name)]
+          :when (not (nil? target))]
+      target)))
 
-; TODO finish this function
 (defn update-attack-intentions
+  "Mark all player characters :under-attack-by adjacent enemies."
   [gridmap characters-by-full-name]
-  (for [character (vals characters-by-full-name)
-        :when     (not (:controlled-by-player? character))]
-    (get-attack-target-full-name gridmap character)))
+  ((apply comp
+    (for [attacker (vals characters-by-full-name)
+          :let     [target (get-attack-target-full-name gridmap attacker)]
+          :when    (and (not (nil? target))
+                        (not (:controlled-by-player? attacker)))]
+     (fn [characters]
+      (update-in characters [target :under-attack-by] #(into [attacker] %)))))
+   characters-by-full-name))
 
 (rf/reg-event-db
   :update-intentions
-  (fn [{:keys [current-scene-idx characters] :as db} _]
+  (fn [{:keys [current-scene-idx characters] :as   db} _]
     (-> db
-      (update-in [:scenes current-scene-idx :gridmap]
-                 (partial update-move-intentions characters))
-      (update :characters
-              (partial update-attack-intentions characters)))))
+        (update-in [:scenes current-scene-idx :gridmap]
+                   (partial update-move-intentions characters))
+        (update :characters
+                (partial update-attack-intentions
+                         (get-in db [:scenes current-scene-idx :gridmap]))))))
 
 (rf/reg-event-db
   :commit-intentions

@@ -40,7 +40,7 @@
        [:span {:style {:color (if controlled-by-player? "blue" "black")}}
         full-name]
        [:br]
-       (if under-attack-by [:span "under attack!"] nil)
+       (if (not (empty? under-attack-by)) [:span "under attack!"] nil)
        [:img {:style {:opacity (if is-intention? 0.2 1.0)
                       :filter  (if under-attack-by "blur(5px)" nil)}
               :src   image}]]

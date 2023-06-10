@@ -58,9 +58,7 @@
               target-full-name))
     (-> db
         (update-in [:characters target-full-name :under-attack-by]
-                   #(if (nil? %)
-                      []
-                      (conj % (:attacking-character db))))
+                   #(into [(:attacking-character db)] %))
         (update-in [:scenes current-scene-idx :gridmap] clear-legal-attacks)
         (dissoc :attacking-character))))
 
@@ -73,7 +71,6 @@
     :as   character}]
   (if health health (get-max-health character)))
     
-
 (defn calc-damage
   [{:keys [equipped-weapon]
     :as   attacker}
@@ -87,14 +84,14 @@
                :as   character}
               (vals characters)]
           [full-name
-           ((apply comp
-             (for [attacker under-attack-by]
-              (fn [defender]
-               (update defender
-                       :health
-                       #(- (get-health defender)
-                           (calc-damage attacker defender))))))
-            character)])))
+           (-> character
+               ((apply comp
+                 (for [attacker under-attack-by]
+                  (fn [defender]
+                   (assoc defender
+                    :health (- (get-health defender)
+                               (calc-damage attacker defender)))))))
+               (dissoc :under-attack-by))])))
 
 (rf/reg-sub
   :attacking-character
