@@ -10,8 +10,9 @@
   {:smoke-bomb {}
    :health-potion {}})
 
-(def classes
+(def character-classes
   {:skirmisher
    {:image ""
     :equippable-weapons #{:sword}
+    :prerequisite-affinities {:fire 1 :earth 1}
     :equippable-utility #{:smoke-bomb :health-potion}}})

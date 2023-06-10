@@ -3,6 +3,7 @@
   [re-frame.core :as rf]
   [day8.re-frame.undo :as undo :refer [undoable]]
   [app.interface.constant-game-data :refer [weapons]]
+  [app.interface.character-stats :refer [get-health]]
   [app.interface.gridmap :refer [update-tiles get-characters-current-tile
                                  get-characters-current-intention-tile]]))
 
@@ -51,35 +52,29 @@
       (update-in [:scenes current-scene-idx :gridmap] clear-legal-attacks)
       (dissoc :attacking-character))))
 
-(rf/reg-event-db
+(rf/reg-event-fx
   :declare-attack-intention
-  (undoable "Begin Attack")
-  (fn [{:keys [current-scene-idx]
-        :as   db}
-       [_ target-full-name]]
-    (prn (str (:attacking-character db)
-              " is intending to attack "
-              target-full-name))
-    (-> db
-        (update-in [:characters target-full-name :under-attack-by]
-                   #(into [(:attacking-character db)] %))
-        (update-in [:scenes current-scene-idx :gridmap] clear-legal-attacks)
-        (dissoc :attacking-character))))
+  (undoable "Declare attack intention")
+  (fn [{:keys [db] {:keys [current-scene-idx]} :db} [_ target-full-name]]
+    {:db (do (prn (str (:attacking-character db)
+                       " is intending to attack "
+                       target-full-name))
+             (-> db
+                 (update-in [:characters target-full-name :under-attack-by]
+                            #(into [(:attacking-character db)] %))
+                 (update-in [:scenes current-scene-idx :gridmap]
+                            clear-legal-attacks)
+                 (dissoc :attacking-character)))
+     :fx [[:dispatch [:update-opponent-intentions]]]}))
 
-(defn get-max-health
-  [character]
-  (:earth (:affinities character)))
-
-(defn get-health
-  [{:keys [health]
-    :as   character}]
-  (if health health (get-max-health character)))
-    
+   
 (defn calc-damage
   [{:keys [equipped-weapon]
     :as   attacker}
    defender]
-  (- (:damage (equipped-weapon weapons)) (:water (:affinities defender))))
+  (min
+    (- (:damage (equipped-weapon weapons)) (:water (:affinities defender)))
+    0))
   
 (defn commit-attacks
   [characters]

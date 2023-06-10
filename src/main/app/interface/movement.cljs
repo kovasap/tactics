@@ -119,7 +119,7 @@
                           :has-intention?]
                          true)
                (dissoc :moving-character)))
-     :fx [[:dispatch [:update-intentions]]]}))
+     :fx [[:dispatch [:update-opponent-intentions]]]}))
 
 (defn character-moved-from-tile?
   [{:keys [intention-character-full-name character-full-name]}]

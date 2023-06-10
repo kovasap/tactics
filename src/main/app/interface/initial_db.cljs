@@ -7,6 +7,7 @@
 (def characters
   [{:full-name           "Main Character"
     :letter-code         "M"
+    :character-class     :skirmisher
     :controlled-by-player? true
     :tiles-already-moved 0
     :has-intention?      false
@@ -23,6 +24,7 @@
     :letter-code         "1"
     :controlled-by-player? false
     :tiles-already-moved 0
+    :character-class     :skirmisher
     :equipped-weapon     :sword
     :has-intention?      false
     :affinities          {:fire  1

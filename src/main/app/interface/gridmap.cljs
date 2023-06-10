@@ -14,7 +14,7 @@
   (first (first (filter (fn [[_ nxt]] (> (:perlin-cutoff nxt) perlin-cutoff))
                   (partition 2 1 (sort-by :perlin-cutoff lands))))))
 
-(assert (= (:type (get-land-below-perlin-cutoff 0.5)) :forest))
+(assert (= (:terrain (get-land-below-perlin-cutoff 0.5)) :forest))
 
 
 ; For a 12x12 map octaves freq amp of 1 0.08 2 seems to work well

@@ -1,38 +1,36 @@
 (ns app.interface.view.character
   (:require [reagent.core :as r]
-            [re-frame.core :as rf]))
+            [re-frame.core :as rf]
+            [app.interface.character-stats :refer [get-health get-max-health]]))
 
 (defn character-name
   [{:keys [controlled-by-player? full-name]}]
   [:span {:style {:color (if controlled-by-player? "blue" "black")}}
         full-name])
 
-(def char-hover-state (r/atom {}))
 (defn- common-character-view
   [{:keys
     [full-name image controlled-by-player? has-intention? under-attack-by]
     :as character}
    is-intention?]
-  (let [hover-key [full-name is-intention?]]
+  (let [hovered-element @(rf/subscribe [:hovered-element])
+        is-hovered?      (= character hovered-element)]
     (if character
-      [:div {:on-mouse-over #(do (if (and controlled-by-player?
-                                          (= has-intention? is-intention?))
-                                   (swap! char-hover-state
-                                     (fn [state] (assoc state hover-key true)))
-                                   nil)
-                                 (rf/dispatch [:hover-element
-                                               :character
-                                               character]))
-             :on-mouse-out  #(swap! char-hover-state
-                               (fn [state] (assoc state hover-key false)))}
+      [:div {:on-mouse-over #(rf/dispatch [:hover-element
+                                           :character
+                                           character])
+             :on-mouse-out  #()
+             :style {:z-index 2}}
        [:div
         {:style {:position   "absolute"
                  :background "white"
                  :overflow   "visible"
                  :text-align "left"
                  :top        50
-                 :z-index    2
-                 :display    (if (get @char-hover-state hover-key)
+                 :z-index    3
+                 :display    (if (and controlled-by-player?
+                                      is-hovered?
+                                      (= has-intention? is-intention?))
                                "block"
                                "none")}}
         [:button.btn.btn-outline-primary
@@ -69,7 +67,12 @@
 ; etc.
 ; Turn health bar/ratio red if the character can be one shot by an enemy on the
 ; map.
-(defn character-stats-view
-  [{:keys [] :as character}]
+(defn character-info-view
+  [{:keys [character-class affinities] :as character}]
   [:div
-   [character-name character]])
+   [character-name character]
+   [:p (name character-class)]
+   [:p (get-health character) " / " (get-max-health character)]
+   (into [:table]
+         (for [[element affinity] affinities]
+           [:tr [:td (name element)] [:td (str affinity)]]))])

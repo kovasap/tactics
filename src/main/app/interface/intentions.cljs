@@ -91,22 +91,30 @@
       (update-in characters [target :under-attack-by] #(into [attacker] %)))))
    characters-by-full-name))
 
+(defn update-opponent-intentions
+  ([db _] (update-opponent-intentions db))
+  ([{:keys [current-scene-idx characters] :as db}]
+   (->
+     db
+     (assoc :opponent-intentions-updated true)
+     (update-in [:scenes current-scene-idx :gridmap]
+                (partial update-move-intentions characters))
+     (#(update %
+               :characters
+               (partial update-attack-intentions
+                        (get-in % [:scenes current-scene-idx :gridmap])))))))
+
 (rf/reg-event-db
-  :update-intentions
-  (fn [{:keys [current-scene-idx characters] :as db} _]
-    (->
-      db
-      (update-in [:scenes current-scene-idx :gridmap]
-                 (partial update-move-intentions characters))
-      (#(update %
-                :characters
-                (partial update-attack-intentions
-                         (get-in % [:scenes current-scene-idx :gridmap])))))))
+  :update-opponent-intentions
+  update-opponent-intentions)
 
 (rf/reg-event-db
   :commit-intentions
-  (fn [{:keys [current-scene-idx] :as db} _]
+  (fn [{:keys [current-scene-idx opponent-intentions-updated] :as db} _]
     (-> db
+        (#(if (not opponent-intentions-updated)
+            (update-opponent-intentions %)
+            db))
         (update :characters reset-movement-status)
         (update-in [:scenes current-scene-idx :gridmap] commit-movements)
         (update :characters commit-attacks))))

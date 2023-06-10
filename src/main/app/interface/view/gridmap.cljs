@@ -32,7 +32,9 @@
                               :width        tile-size
                               :aspect-ratio "1"
                               :position     "relative"}
-              :on-mouse-over #()
+              :on-mouse-over #(if intention-character-full-name
+                                nil
+                                (rf/dispatch [:hover-element :tile tile]))
               :on-mouse-out  #()
               :on-click      #(cond is-legal-move (rf/dispatch
                                                    [:declare-move-intention
@@ -62,6 +64,16 @@
     (if (not (and character-full-name intention-character-full-name))
       [intention-character-view intention-character]
       nil)]]))
+
+
+(defn tile-info-view
+  [{:keys [row-idx col-idx] {:keys [terrain steps-to-move-through]} :land}]
+  [:div
+   [:p row-idx ", " col-idx]
+   [:p (name terrain)]
+   [:p (if (nil? steps-to-move-through)
+         "impassible"
+         (str steps-to-move-through " steps to traverse"))]])
 
 
 (defn gridmap-view
