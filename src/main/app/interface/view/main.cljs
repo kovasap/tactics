@@ -7,6 +7,22 @@
             [app.interface.view.tactical-scenario :refer [tactical-scenario]]
             [cljs.pprint]))
 
+(rf/reg-sub
+  :hovered-element
+  (fn [db _]
+    (:hovered-element db)))
+
+(rf/reg-sub
+  :hovered-element-type
+  (fn [db _]
+    (:hovered-element-type db)))
+
+(rf/reg-event-db
+  :hover-element
+  (fn [db [_ element-type element]]
+    (assoc db :hovered-element element
+              :hovered-element-type element-type)))
+
 (defn undo-button
   []
   ; only enable the button when there's undos
@@ -47,8 +63,8 @@
      "Reset App"]
     [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:advance-scene])}
      "Next Scene"]
-    [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:commit-intentions])}
-     "End turn"]
+    [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:pass-turn])}
+     "End turn (enter)"]
     [undo-button]]
    (let [current-scene @(rf/subscribe [:current-scene])]
      (cond

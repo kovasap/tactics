@@ -2,6 +2,11 @@
   (:require [reagent.core :as r]
             [re-frame.core :as rf]))
 
+(defn character-name
+  [{:keys [controlled-by-player? full-name]}]
+  [:span {:style {:color (if controlled-by-player? "blue" "black")}}
+        full-name])
+
 (def char-hover-state (r/atom {}))
 (defn- common-character-view
   [{:keys
@@ -10,11 +15,14 @@
    is-intention?]
   (let [hover-key [full-name is-intention?]]
     (if character
-      [:div {:on-mouse-over #(if (and controlled-by-player?
-                                      (= has-intention? is-intention?))
-                               (swap! char-hover-state
-                                 (fn [state] (assoc state hover-key true)))
-                               nil)
+      [:div {:on-mouse-over #(do (if (and controlled-by-player?
+                                          (= has-intention? is-intention?))
+                                   (swap! char-hover-state
+                                     (fn [state] (assoc state hover-key true)))
+                                   nil)
+                                 (rf/dispatch [:hover-element
+                                               :character
+                                               character]))
              :on-mouse-out  #(swap! char-hover-state
                                (fn [state] (assoc state hover-key false)))}
        [:div
@@ -37,8 +45,7 @@
                        (rf/dispatch [:cancel-attack])
                        (rf/dispatch [:begin-attack character]))}
          "Attack"]]
-       [:span {:style {:color (if controlled-by-player? "blue" "black")}}
-        full-name]
+       [character-name character]
        [:br]
        (if (not (empty? under-attack-by)) [:span "under attack!"] nil)
        [:img {:style {:opacity (if is-intention? 0.2 1.0)
@@ -63,4 +70,6 @@
 ; Turn health bar/ratio red if the character can be one shot by an enemy on the
 ; map.
 (defn character-stats-view
-  [character])
+  [{:keys [] :as character}]
+  [:div
+   [character-name character]])

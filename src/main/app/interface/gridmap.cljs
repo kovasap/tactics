@@ -41,11 +41,13 @@
 
 (defn tile-from-str
   [row-idx col-idx [tile-letter bonus-letter] characters-by-letter-code]
-  (base-tile
-    {:row-idx row-idx
-     :col-idx col-idx
-     :character-full-name (:full-name (characters-by-letter-code bonus-letter))
-     :land    (get-only lands :letter tile-letter)}))
+  (let [character-full-name (:full-name (characters-by-letter-code bonus-letter))]
+    (base-tile
+      {:row-idx row-idx
+       :col-idx col-idx
+       :character-full-name character-full-name
+       :intention-character-full-name character-full-name 
+       :land    (get-only lands :letter tile-letter)})))
 
 (defn parse-gridmap-str
   "Returns 2d array of tile maps."

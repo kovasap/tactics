@@ -79,19 +79,23 @@
    
 
 (defn declare-move-intention
- [{:keys [full-name]} path gridmap]
- (let [{from-row-idx :row-idx from-col-idx :col-idx} (first path)
-       steps (subvec path 1 (dec (count path)))
-       {to-row-idx :row-idx to-col-idx :col-idx} (last path)]
-  (-> gridmap
-      (clear-legal-moves)
-      ; Add waypoints
-      ((apply comp
-        (for [{path-row-idx :row-idx path-col-idx :col-idx} steps]
-         #(assoc-in % [path-row-idx path-col-idx :waypoint-for] full-name))))
-      (assoc-in [from-row-idx from-col-idx :intention-character-full-name] nil)
-      (assoc-in [to-row-idx to-col-idx :intention-character-full-name]
-                full-name))))
+  [{:keys [full-name]} path gridmap]
+  (if (empty? path)
+    (clear-legal-moves gridmap)
+    (let [{from-row-idx :row-idx from-col-idx :col-idx} (first path)
+          steps (subvec path 1 (dec (count path)))
+          {to-row-idx :row-idx to-col-idx :col-idx} (last path)]
+      (->
+        gridmap
+        (clear-legal-moves)
+        ; Add waypoints
+        ((apply comp
+          (for [{path-row-idx :row-idx path-col-idx :col-idx} steps]
+           #(assoc-in % [path-row-idx path-col-idx :waypoint-for] full-name))))
+        (assoc-in [from-row-idx from-col-idx :intention-character-full-name]
+                  nil)
+        (assoc-in [to-row-idx to-col-idx :intention-character-full-name]
+                  full-name)))))
 
 (rf/reg-event-fx
   :declare-move-intention
@@ -117,34 +121,30 @@
                (dissoc :moving-character)))
      :fx [[:dispatch [:update-intentions]]]}))
 
+(defn character-moved-from-tile?
+  [{:keys [intention-character-full-name character-full-name]}]
+  (and character-full-name
+       (not (= intention-character-full-name character-full-name))))
 
-(defn get-moved-character-full-names
-  [gridmap]
-  (into #{} (map :intention-character-full-name
-              (get-tiles gridmap :intention-character-full-name))))
-
-(def character-moved?
- (memoize (fn [gridmap {:keys [character-full-name]}]
-           ((get-moved-character-full-names gridmap) character-full-name))))
+(defn character-moved-to-tile?
+  [{:keys [intention-character-full-name character-full-name]}]
+  (and intention-character-full-name
+       (not (= intention-character-full-name character-full-name))))
 
 (defn commit-movements
   [gridmap]
   (-> gridmap
       ; remove old positons for moved characters
-      (update-tiles (partial character-moved? gridmap)
-                    (fn [tile] (dissoc tile :character-full-name)))
+      (update-tiles character-moved-from-tile?
+                    #(dissoc % :character-full-name))
       ; remove waypoints
       ; TODO if hitting a waypoints triggers any effect, do it here
       (update-tiles (fn [{:keys [waypoint-for]}] waypoint-for)
                     (fn [tile] (dissoc tile :waypoint-for)))
       ; add new positions
       (update-tiles
-        :intention-character-full-name
-        (fn [{:keys [intention-character-full-name] :as tile}]
-          (-> tile
-              (assoc :character-full-name
-                     intention-character-full-name)
-              (dissoc :intention-character-full-name))))))
+        character-moved-to-tile?
+        #(assoc % :character-full-name (:intention-character-full-name %)))))
 
 (defn reset-movement-status
   [characters]

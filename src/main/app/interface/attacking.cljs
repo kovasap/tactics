@@ -3,7 +3,8 @@
   [re-frame.core :as rf]
   [day8.re-frame.undo :as undo :refer [undoable]]
   [app.interface.constant-game-data :refer [weapons]]
-  [app.interface.gridmap :refer [update-tiles get-characters-current-tile]]))
+  [app.interface.gridmap :refer [update-tiles get-characters-current-tile
+                                 get-characters-current-intention-tile]]))
 
 (defn distance
   [{from-row-idx :row-idx from-col-idx :col-idx}
@@ -16,7 +17,7 @@
   (:range (equipped-weapon weapons)))
 
 (defn tile-in-attack-range?
-  [character character-tile gridmap tile]
+  [character character-tile tile]
   (> (inc (get-attack-range character))
      (distance character-tile tile)
      0))
@@ -25,9 +26,9 @@
   [character gridmap]
   (update-tiles gridmap
                 (partial tile-in-attack-range?
-                         (get-characters-current-tile gridmap character)
                          character
-                         gridmap)
+                         (get-characters-current-intention-tile gridmap
+                                                                character))
                 #(assoc % :is-legal-attack true)))
 
 (rf/reg-event-db

@@ -55,8 +55,13 @@
      ", "
      col-idx]
     (if waypoint-for [:span "wp"] nil)
+    #_[:div "intention=" intention-character-full-name
+            [:br]
+            "current=" character-full-name]
     [character-view character]
-    [intention-character-view intention-character]]]))
+    (if (not (and character-full-name intention-character-full-name))
+      [intention-character-view intention-character]
+      nil)]]))
 
 
 (defn gridmap-view

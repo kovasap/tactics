@@ -43,25 +43,16 @@
 
 (defn update-move-intention
  "Returns a gridmap with :intention-character-full-name tile keys filled in."
- [{:keys [full-name] :as character} characters-by-full-name gridmap]
- (-> gridmap
-     ; First clear old intentions
-     ; TODO Note that we may want to do this for all characters not controlled
-     ; by the player upfront to avoid cases where characters avoid spaces
-     ; occupied by old intentions
-     (update-tiles #(= full-name (:intention-character-full-name %))
-                   #(dissoc % :intention-character-full-name))
-     ; Clear old waypoints
-     (update-tiles #(= full-name (:waypoint-for %)) #(dissoc % :waypoint-for))
-     ; Make AI movement intentions.
-     ((partial declare-move-intention
-               character
-               (truncate-occupied-path-steps
-                 (truncate-path (get-path-to-nearest-player-character
-                                       gridmap
-                                       character
-                                       characters-by-full-name)
-                                (get-tiles-left-to-move character)))))))
+ [character characters-by-full-name gridmap]
+ ((partial declare-move-intention
+           character
+           (truncate-occupied-path-steps
+             (truncate-path (get-path-to-nearest-player-character
+                                   gridmap
+                                   character
+                                   characters-by-full-name)
+                            (get-tiles-left-to-move character))))
+  gridmap))
 
 (defn update-move-intentions
   [characters-by-full-name gridmap]
@@ -74,20 +65,19 @@
 (defn get-attack-target-full-name
   [gridmap attacker]
   ; TODO maybe make more intelligent target selection?
-  #p
-   (first (for [{:keys [intention-character-full-name character-full-name]}
-                (get-tiles
-                  gridmap
-                  (partial tile-in-attack-range?
-                           attacker
-                           (or (get-characters-current-intention-tile gridmap
-                                                                      attacker)
-                               (get-characters-current-tile gridmap attacker))
-                           gridmap))
-                :let  [target (or intention-character-full-name
-                                  character-full-name)]
-                :when (not (nil? target))]
-            target)))
+  (first
+    (for [{:keys [intention-character-full-name]}
+          (get-tiles
+            gridmap
+            (partial tile-in-attack-range?
+                     attacker
+                     (or (get-characters-current-intention-tile gridmap
+                                                                attacker)
+                         (get-characters-current-tile gridmap attacker))
+                     gridmap))
+          :let  [target intention-character-full-name]
+          :when (not (nil? target))]
+      target)))
 
 (defn update-attack-intentions
   "Mark all player characters :under-attack-by adjacent enemies."
@@ -103,13 +93,15 @@
 
 (rf/reg-event-db
   :update-intentions
-  (fn [{:keys [current-scene-idx characters] :as   db} _]
-    (-> db
-        (update-in [:scenes current-scene-idx :gridmap]
-                   (partial update-move-intentions characters))
-        (update :characters
+  (fn [{:keys [current-scene-idx characters] :as db} _]
+    (->
+      db
+      (update-in [:scenes current-scene-idx :gridmap]
+                 (partial update-move-intentions characters))
+      (#(update %
+                :characters
                 (partial update-attack-intentions
-                         (get-in db [:scenes current-scene-idx :gridmap]))))))
+                         (get-in % [:scenes current-scene-idx :gridmap])))))))
 
 (rf/reg-event-db
   :commit-intentions

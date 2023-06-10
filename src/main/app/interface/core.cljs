@@ -13,22 +13,24 @@
             [app.interface.movement]
             [app.interface.attacking]
             [app.interface.intentions]
+            [app.interface.keyboard]
             [cljs.pprint]
             [taoensso.timbre :as log]))
-
-;; ----------------------------------------------------------------------------
-;; Setup
 
 (rf/reg-event-db
   :app/setup
   (fn [_ _]
     initial-db))
-    
 
 (rf/reg-sub
  :characters-by-full-name
  (fn [db _]
    (:characters db)))
+
+(rf/reg-event-fx
+  :pass-turn
+  (fn [cofx _]
+    {:fx [[:dispatch [:commit-intentions]]]}))
 
 (rf/reg-event-db
   :advance-scene
