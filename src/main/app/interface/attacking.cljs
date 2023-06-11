@@ -67,15 +67,23 @@
                  (dissoc :attacking-character)))
      :fx [[:dispatch [:update-opponent-intentions]]]}))
 
-   
+
+(defn get-weapon-damage
+  [{:keys [equipped-weapon]}]
+  (:damage (equipped-weapon weapons)))
+ 
+
+(defn get-damage-reduction
+  [{{:keys [water]} :affinities}]
+  water)
+
 (defn calc-damage
-  [{:keys [equipped-weapon]
-    :as   attacker}
-   defender]
-  (min
-    (- (:damage (equipped-weapon weapons)) (:water (:affinities defender)))
-    0))
+  [attacker defender]
+  (min (- (get-weapon-damage attacker) (get-damage-reduction defender)) 0))
   
+; TODO make the attack a battle with both sides potentially doing damage
+; multiple times based on speed (like in fire emblem)
+; Animate this
 (defn commit-attacks
   [characters]
   (into {}

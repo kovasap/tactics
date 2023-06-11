@@ -19,7 +19,9 @@
                           :light 0
                           :dark  0}
     :image               "unit-images/merfolk/citizen.png"
-    :animations          {:attack []}}
+    :animations          {:attack ["unit-images/merfolk/citizen-fist-1.png"
+                                   "unit-images/merfolk/citizen-fist-2.png"
+                                   "unit-images/merfolk/citizen-fist-3.png"]}}
    {:full-name           "Opponent One"
     :letter-code         "1"
     :controlled-by-player? false
