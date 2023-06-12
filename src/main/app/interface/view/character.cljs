@@ -73,6 +73,7 @@
    [character-name character]
    [:p (name character-class)]
    [:p (get-health character) " / " (get-max-health character)]
-   (into [:table]
-         (for [[element affinity] affinities]
-           [:tr [:td (name element)] [:td (str affinity)]]))])
+   [:table
+     (into [:tbody]
+           (for [[element affinity] affinities]
+             [:tr [:td (name element)] [:td (str affinity)]]))]])
