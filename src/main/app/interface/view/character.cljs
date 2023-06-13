@@ -9,11 +9,13 @@
         full-name])
 
 (defn- common-character-view
-  [{:keys [image controlled-by-player? has-intention?] :as character}
+  [{:keys [image controlled-by-player? has-move-intention?] :as character}
    is-intention?]
   (let [hovered-element @(rf/subscribe [:hovered-element])
         is-hovered?     (= character hovered-element)
-        under-attack?  @(rf/subscribe [:under-attack? character])]
+        under-attack?   (and @(rf/subscribe [:under-attack? character])
+                             (= (boolean has-move-intention?)
+                                is-intention?))]
     (if character
       [:div {:on-mouse-over #(rf/dispatch [:hover-element
                                            :character
@@ -29,7 +31,8 @@
                  :z-index    3
                  :display    (if (and controlled-by-player?
                                       is-hovered?
-                                      (= has-intention? is-intention?))
+                                      (= (boolean has-move-intention?)
+                                         is-intention?))
                                "block"
                                "none")}}
         [:button.btn.btn-outline-primary

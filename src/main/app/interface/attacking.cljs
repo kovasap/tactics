@@ -56,6 +56,8 @@
       (update-in [:scenes current-scene-idx :gridmap] clear-legal-attacks)
       (dissoc :attacking-character))))
 
+; TODO group these attacks into rounds so that if one unit is killed by an
+; attack they don't get a counterattack
 (defn get-attacks
   [attacker defender]
   [; Attack

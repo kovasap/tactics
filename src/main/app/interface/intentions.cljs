@@ -74,8 +74,7 @@
                      attacker
                      (or (get-characters-current-intention-tile gridmap
                                                                 attacker)
-                         (get-characters-current-tile gridmap attacker))
-                     gridmap))
+                         (get-characters-current-tile gridmap attacker))))
           :when (not (nil? intention-character-full-name))]
       intention-character-full-name)))
 
@@ -88,33 +87,35 @@
                         (not (:controlled-by-player? attacker)))]
       (get-attacks attacker (characters-by-full-name target-full-name)))))
 
-(defn update-opponent-intentions
-  ([db _] (update-opponent-intentions db))
-  ([{:keys [current-scene-idx characters] :as db}]
-   (->
-     db
-     (assoc :opponent-intentions-updated true)
-     (update-in [:scenes current-scene-idx :gridmap]
-                (partial update-move-intentions characters))
-     (update :pending-attacks
-             #(into []
-               (concat %
-                       (get-attack-intentions
-                              (get-in db [:scenes current-scene-idx :gridmap])
-                              characters)))))))
 
 (rf/reg-event-db
+  :update-opponent-move-intentions
+  (fn [{:keys [current-scene-idx characters] :as db}]
+     (update-in db [:scenes current-scene-idx :gridmap]
+                (partial update-move-intentions characters))))
+
+(rf/reg-event-db
+  :update-opponent-attack-intentions
+  (fn [{:keys [current-scene-idx characters] :as db}]
+    (update db
+            :pending-attacks
+            #(into []
+                   (concat %
+                           (get-attack-intentions
+                             (get-in db [:scenes current-scene-idx :gridmap])
+                             characters))))))
+
+(rf/reg-event-fx
   :update-opponent-intentions
-  update-opponent-intentions)
+  (fn [{:keys [db]} _]
+    {:db (assoc db :opponent-intentions-updated true)
+     :fx [[:dispatch [:update-opponent-move-intentions]]
+          [:dispatch [:update-opponent-attack-intentions]]]}))
 
 (rf/reg-event-fx
   :execute-intentions
-  (fn [{{:keys [current-scene-idx opponent-intentions-updated] :as db} :db} _]
-    {:db
-      (-> db
-          (#(if (not opponent-intentions-updated)
-             (update-opponent-intentions %)
-             db))
-          (update :characters reset-movement-status)
-          (update-in [:scenes current-scene-idx :gridmap] execute-movements))
-     :fx [[:dispatch [:execute-attacks]]]}))
+  (fn [{:keys [db]} _]
+    {:db (dissoc db :opponent-intentions-updated)
+     :fx [[:dispatch [:update-opponent-intentions]]
+          [:dispatch [:execute-movements]]
+          [:dispatch [:execute-attacks]]]}))

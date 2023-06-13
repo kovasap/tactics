@@ -153,6 +153,13 @@
           [full-name (assoc character :tiles-already-moved 0
                                       :has-intention? false)])))
 
+(rf/reg-event-db
+  :execute-movements
+  (fn [{:keys [current-scene-idx ] :as db}]
+    (-> db
+      (update :characters reset-movement-status)
+      (update-in [:scenes current-scene-idx :gridmap] execute-movements))))
+
 (rf/reg-sub
   :moving-character
   (fn [db _]
