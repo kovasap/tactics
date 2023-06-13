@@ -30,7 +30,7 @@
 (rf/reg-event-fx
   :pass-turn
   (fn [cofx _]
-    {:fx [[:dispatch [:commit-intentions]]]}))
+    {:fx [[:dispatch [:execute-intentions]]]}))
 
 (rf/reg-event-db
   :advance-scene

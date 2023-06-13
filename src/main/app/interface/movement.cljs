@@ -131,7 +131,7 @@
   (and intention-character-full-name
        (not (= intention-character-full-name character-full-name))))
 
-(defn commit-movements
+(defn execute-movements
   [gridmap]
   (-> gridmap
       ; remove old positons for moved characters

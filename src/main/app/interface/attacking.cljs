@@ -3,7 +3,8 @@
             [re-frame.core :as rf]
             [day8.re-frame.undo :as undo :refer [undoable]]
             [app.interface.constant-game-data :refer [weapons]]
-            [app.interface.character-stats :refer [get-health]]
+            [app.interface.character-stats :refer [get-max-health]]
+            [app.interface.animations :refer [get-animation-duration]]
             [app.interface.gridmap
              :refer
              [update-tiles
@@ -55,16 +56,30 @@
       (update-in [:scenes current-scene-idx :gridmap] clear-legal-attacks)
       (dissoc :attacking-character))))
 
+(defn get-attacks
+  [attacker defender]
+  [; Attack
+   {:attacker attacker :defender defender}
+   ;Counterattack
+   {:attacker defender :defender attacker}])
+   ; TODO add more attacks based on the character's speed
+   
 (rf/reg-event-fx
   :declare-attack-intention
   (undoable "Declare attack intention")
-  (fn [{:keys [db] {:keys [current-scene-idx]} :db} [_ target-full-name]]
-    {:db (do (prn (str (:attacking-character db)
+  (fn [{:keys [db]
+        {:keys [current-scene-idx attacking-character characters]} :db}
+       [_ target-full-name]]
+    {:db (do (prn (str attacking-character
                        " is intending to attack "
                        target-full-name))
              (-> db
-                 (update-in [:characters target-full-name :under-attack-by]
-                            #(into [(:attacking-character db)] %))
+                 (update
+                   :pending-attacks
+                   #(into []
+                          (concat (get-attacks attacking-character
+                                               (characters target-full-name))
+                                  %)))
                  (update-in [:scenes current-scene-idx :gridmap]
                             clear-legal-attacks)
                  (dissoc :attacking-character)))
@@ -84,55 +99,74 @@
   [attacker defender]
   (min (- (get-weapon-damage attacker) (get-damage-reduction defender)) 0))
 
-
-(def time-between-frames-ms 100)
-
-; TODO add movement of the actual character to this via some kind of offset
-; parameter, so that the character moves in the direction of e.g. their attack.
-(rf/reg-event-fx
-  :play-animation
-  (fn [cofx
-       [_ {:keys [animations image] :as character}
-        animation]]
-    {:fx (into
-           []
-           (for [[i frame] (map-indexed vector
-                                        (conj (animation animations) image))]
-             [:dispatch-later {:ms       (* i time-between-frames-ms)
-                               :dispatch [:update-image
-                                          character
-                                          frame]}]))}))
+(defn get-post-attacks-character
+  "Get a character after they were involved in the given attacks."
+  [{:keys [full-name] :as character} attacks]
+  ((apply comp
+    (for [{{defender-full-name :full-name} :defender :keys [attacker defender]}
+          attacks
+          :when (= full-name defender-full-name)]
+     (fn [character]
+      (update character
+              :health
+              (fnil #(- % (calc-damage attacker defender))
+                    (get-max-health character))))))
+   character))
 
 (rf/reg-event-db
-  :update-image
-  (fn [db [_ {:keys [full-name]} image-path]]
-    (update-in db [:characters full-name] #(assoc % :image image-path))))
+  :execute-attack-stat-change
+  (fn [db [_ {:keys [defender] :as attack}]]
+    (update-in db [:characters (:full-name defender)]
+                  #(get-post-attacks-character % [attack]))))
 
-  
-; TODO make the attack a battle with both sides potentially doing damage
-; multiple times based on speed (like in fire emblem)
-; To animate this we might need to make a list of all animation frames from
-; both characters at once.
-(defn commit-attacks
-  [characters]
-  (into {}
-        (for [{:keys [full-name under-attack-by]
-               :as   character}
-              (vals characters)]
-          (do
-            ; TODO move this somewhere else
-            (rf/dispatch [:play-animation (first under-attack-by) :attack])
-            [full-name
-             (-> character
-                 ((apply comp
-                   (for [attacker under-attack-by]
-                    (fn [defender]
-                     (assoc defender
-                      :health (- (get-health defender)
-                                 (calc-damage attacker defender)))))))
-                 (dissoc :under-attack-by))]))))
+(rf/reg-event-fx
+  :execute-attack
+  (fn [_
+       [_ {:keys [attacker] :as   attack}
+        delay-ms]]
+    {:fx [[:dispatch-later {:ms       delay-ms
+                              :dispatch [:play-animation attacker :attack]}]
+          [:dispatch-later
+           {:ms       (+ delay-ms (get-animation-duration attacker :attack))
+            :dispatch [:execute-attack-stat-change attack]}]]}))
+
+(defn get-duration-of-attacks-ms
+  [attacks]
+  (reduce +
+    (for [{:keys [attacker]} attacks]
+      (get-animation-duration attacker :attack))))
+
+(rf/reg-event-db
+  :clear-pending-attacks
+  (fn [db _]
+    (dissoc db :pending-attacks)))
+
+(rf/reg-event-fx
+  :execute-attacks
+  (fn [{:keys [db]} _]
+    {:fx (let [pending-attacks (vector (:pending-attacks db))]
+           (vec (concat (for [[i attack] (map-indexed vector
+                                                      (:pending-attacks db))
+                              :let       [current-delay
+                                          (get-duration-of-attacks-ms
+                                            (subvec pending-attacks 0 i))]]
+                          [:dispatch-later
+                           {:ms       current-delay
+                            :dispatch [:execute-attack attack current-delay]}])
+                        [[:dispatch [:clear-pending-attacks]]])))}))
+
+(rf/reg-sub
+  :under-attack?
+  (fn [{:keys [pending-attacks]} [_ {:keys [full-name]}]]
+    (some #(= full-name %)
+          (map #(:full-name (:defender %)) pending-attacks))))
 
 (rf/reg-sub
   :attacking-character
   (fn [db _]
     (:attacking-character db)))
+
+(rf/reg-sub
+  :pending-attacks
+  (fn [db _]
+    (:pending-attacks db)))

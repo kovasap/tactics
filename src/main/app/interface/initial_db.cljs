@@ -12,31 +12,23 @@
     :tiles-already-moved 0
     :has-intention?      false
     :equipped-weapon     :sword
-    :affinities          {:fire  1
-                          :air   8
-                          :earth 2
-                          :water 3
-                          :light 0
-                          :dark  0}
+    :affinities          {:fire 1 :air 8 :earth 2 :water 3 :light 0 :dark 0}
     :image               "unit-images/merfolk/citizen.png"
     :animations          {:attack ["unit-images/merfolk/citizen-fist-1.png"
                                    "unit-images/merfolk/citizen-fist-2.png"
                                    "unit-images/merfolk/citizen-fist-3.png"]}}
-   {:full-name           "Opponent One"
-    :letter-code         "1"
+   {:full-name             "Opponent One"
+    :letter-code           "1"
     :controlled-by-player? false
-    :tiles-already-moved 0
-    :character-class     :skirmisher
-    :equipped-weapon     :sword
-    :has-intention?      false
-    :affinities          {:fire  1
-                          :air   3
-                          :earth 2
-                          :water 3
-                          :light 0
-                          :dark  0}
-    :image               "unit-images/merfolk/entangler.png"
-    :animations          {:attack []}}])
+    :tiles-already-moved   0
+    :character-class       :skirmisher
+    :equipped-weapon       :sword
+    :has-intention?        false
+    :affinities            {:fire 1 :air 3 :earth 2 :water 3 :light 0 :dark 0}
+    :image                 "unit-images/merfolk/entangler.png"
+    :animations            {:attack
+                            ["unit-images/merfolk/entangler-defend1.png"
+                             "unit-images/merfolk/entangler-defend2.png"]}}])
 
 (defn parse-gridmap-str-with-characters
   [gridmap-str]

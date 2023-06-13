@@ -1,22 +1,23 @@
 (ns app.interface.intentions
-  (:require
-    [re-frame.core :as rf]
-    [app.interface.movement
-     :refer
-     [get-path
-      declare-move-intention
-      truncate-path
-      get-tiles-left-to-move
-      reset-movement-status
-      commit-movements]]
-    [app.interface.attacking :refer [commit-attacks tile-in-attack-range?]]
-    [app.interface.gridmap
-     :refer
-     [get-adjacent-tiles
-      get-characters-current-tile
-      get-characters-current-intention-tile
-      update-tiles
-      get-tiles]]))
+  (:require [re-frame.core :as rf]
+            [app.interface.movement
+             :refer
+             [get-path
+              declare-move-intention
+              truncate-path
+              get-tiles-left-to-move
+              reset-movement-status
+              execute-movements]]
+            [app.interface.attacking
+             :refer
+             [get-attacks tile-in-attack-range?]]
+            [app.interface.gridmap
+             :refer
+             [get-adjacent-tiles
+              get-characters-current-tile
+              get-characters-current-intention-tile
+              update-tiles
+              get-tiles]]))
 
 ; TODO add "aggresive" "cautious" and other "personalities" to the AI movement
 ; potentially depending on their element affinity.
@@ -75,21 +76,17 @@
                                                                 attacker)
                          (get-characters-current-tile gridmap attacker))
                      gridmap))
-          :let  [target intention-character-full-name]
-          :when (not (nil? target))]
-      target)))
+          :when (not (nil? intention-character-full-name))]
+      intention-character-full-name)))
 
-(defn update-attack-intentions
-  "Mark all player characters :under-attack-by adjacent enemies."
+(defn get-attack-intentions
   [gridmap characters-by-full-name]
-  ((apply comp
+  (reduce concat
     (for [attacker (vals characters-by-full-name)
-          :let     [target (get-attack-target-full-name gridmap attacker)]
-          :when    (and (not (nil? target))
+          :let     [target-full-name (get-attack-target-full-name gridmap attacker)]
+          :when    (and (not (nil? target-full-name))
                         (not (:controlled-by-player? attacker)))]
-     (fn [characters]
-      (update-in characters [target :under-attack-by] #(into [attacker] %)))))
-   characters-by-full-name))
+      (get-attacks attacker (characters-by-full-name target-full-name)))))
 
 (defn update-opponent-intentions
   ([db _] (update-opponent-intentions db))
@@ -99,22 +96,25 @@
      (assoc :opponent-intentions-updated true)
      (update-in [:scenes current-scene-idx :gridmap]
                 (partial update-move-intentions characters))
-     (#(update %
-               :characters
-               (partial update-attack-intentions
-                        (get-in % [:scenes current-scene-idx :gridmap])))))))
+     (update :pending-attacks
+             #(into []
+               (concat %
+                       (get-attack-intentions
+                              (get-in db [:scenes current-scene-idx :gridmap])
+                              characters)))))))
 
 (rf/reg-event-db
   :update-opponent-intentions
   update-opponent-intentions)
 
-(rf/reg-event-db
-  :commit-intentions
-  (fn [{:keys [current-scene-idx opponent-intentions-updated] :as db} _]
-    (-> db
-        (#(if (not opponent-intentions-updated)
-            (update-opponent-intentions %)
-            db))
-        (update :characters reset-movement-status)
-        (update-in [:scenes current-scene-idx :gridmap] commit-movements)
-        (update :characters commit-attacks))))
+(rf/reg-event-fx
+  :execute-intentions
+  (fn [{{:keys [current-scene-idx opponent-intentions-updated] :as db} :db} _]
+    {:db
+      (-> db
+          (#(if (not opponent-intentions-updated)
+             (update-opponent-intentions %)
+             db))
+          (update :characters reset-movement-status)
+          (update-in [:scenes current-scene-idx :gridmap] execute-movements))
+     :fx [[:dispatch [:execute-attacks]]]}))

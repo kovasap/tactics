@@ -18,26 +18,27 @@
 ; https://lparchive.org/Fire-Emblem-Blazing-Sword/Update%2001/18-L01P17.png
 (defn battle-preview-panel
   []
-  (let [{:keys [under-attack-by full-name] :as defender} @(rf/subscribe
-                                                            [:hovered-element])
-        hovered-element-type @(rf/subscribe [:hovered-element-type])]
+  (let [{:keys [full-name]}  @(rf/subscribe [:hovered-element])
+        hovered-element-type @(rf/subscribe [:hovered-element-type])
+        pending-attacks      @(rf/subscribe [:pending-attacks])]
     (if (and (= hovered-element-type :character)
-             (not (empty? under-attack-by)))
+             (not (empty? pending-attacks)))
       [:div {:style {:display  "grid"
                      :grid-template-columns "auto auto"
                      :grid-gap "5px"}}
        (into [:div]
-             (for [attacker under-attack-by]
+             (for [{:keys [attacker defender]} pending-attacks
+                   :when (= full-name (:full-name defender))]
                [:div
-                 [:div
-                  "Attacker: "
-                  (:full-name attacker)
-                  [:div "Weapon damage " (get-weapon-damage attacker)]]
-                 [:div
-                  "Defender "
-                  full-name
-                  [:div "Damage reduction " (get-damage-reduction defender)]]
-                 [:div "Final damage: " (calc-damage attacker defender)]]))]
+                [:div
+                 "Attacker: "
+                 (:full-name attacker)
+                 [:div "Weapon damage " (get-weapon-damage attacker)]]
+                [:div
+                 "Defender "
+                 full-name
+                 [:div "Damage reduction " (get-damage-reduction defender)]]
+                [:div "Final damage: " (calc-damage attacker defender)]]))]
       nil)))
 
 (defn tactical-scenario
