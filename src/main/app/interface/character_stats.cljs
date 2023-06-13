@@ -3,7 +3,7 @@
 ; TODO make every class give a bonus to this value
 (defn get-max-health
   [character]
-  (:earth (:affinities character)))
+  (* 5 (:earth (:affinities character))))
 
 (defn get-health
   [{:keys [health]

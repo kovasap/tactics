@@ -9,13 +9,12 @@
         full-name])
 
 (defn- common-character-view
-  [{:keys [image controlled-by-player? has-move-intention?] :as character}
+  [{:keys [image controlled-by-player? has-move-intention? dead] :as character}
    is-intention?]
   (let [hovered-element @(rf/subscribe [:hovered-element])
         is-hovered?     (= character hovered-element)
         under-attack?   (and @(rf/subscribe [:under-attack? character])
-                             (= (boolean has-move-intention?)
-                                is-intention?))]
+                             (= (boolean has-move-intention?) is-intention?))]
     (if character
       [:div {:on-mouse-over #(rf/dispatch [:hover-element
                                            :character
@@ -31,6 +30,7 @@
                  :z-index    3
                  :display    (if (and controlled-by-player?
                                       is-hovered?
+                                      (not dead)
                                       (= (boolean has-move-intention?)
                                          is-intention?))
                                "block"
@@ -46,10 +46,15 @@
                        (rf/dispatch [:begin-attack character]))}
          "Attack"]]
        [character-name character]
+       [:progress.health {:value (get-health character)
+                          :max   (get-max-health character)}]
        [:br]
        (if under-attack? [:span "under attack!"] nil)
        [:img {:style {:opacity (if is-intention? 0.2 1.0)
-                      :filter  (if under-attack? "blur(5px)" nil)}
+                      :transform (if dead "rotate(90deg)" nil)
+                      :filter  (if under-attack?
+                                 "drop-shadow(0px 0px 20px red)"
+                                 nil)}
               :src   image}]]
       nil)))
 

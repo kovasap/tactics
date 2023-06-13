@@ -33,7 +33,9 @@
                                             (characters-by-full-name
                                              character-full-name))))]
     (get-path gridmap
-              (get-characters-current-tile gridmap character)
+              (or (get-characters-current-intention-tile gridmap
+                                                         character)
+                  (get-characters-current-tile gridmap character))
               player-character-tile)))))
 
 (defn truncate-occupied-path-steps
@@ -59,7 +61,8 @@
   [characters-by-full-name gridmap]
   ((apply comp
     (for [character (vals characters-by-full-name)
-          :when     (not (:controlled-by-player? character))]
+          :when     (and (not (:dead character))
+                         (not (:controlled-by-player? character)))]
      (partial update-move-intention character characters-by-full-name)))
    gridmap))
 
@@ -84,6 +87,7 @@
     (for [attacker (vals characters-by-full-name)
           :let     [target-full-name (get-attack-target-full-name gridmap attacker)]
           :when    (and (not (nil? target-full-name))
+                        (not (:dead attacker))
                         (not (:controlled-by-player? attacker)))]
       (get-attacks attacker (characters-by-full-name target-full-name)))))
 
@@ -108,14 +112,13 @@
 (rf/reg-event-fx
   :update-opponent-intentions
   (fn [{:keys [db]} _]
-    {:db (assoc db :opponent-intentions-updated true)
-     :fx [[:dispatch [:update-opponent-move-intentions]]
+    {:fx [[:dispatch [:update-opponent-move-intentions]]
           [:dispatch [:update-opponent-attack-intentions]]]}))
 
 (rf/reg-event-fx
   :execute-intentions
   (fn [{:keys [db]} _]
-    {:db (dissoc db :opponent-intentions-updated)
-     :fx [[:dispatch [:update-opponent-intentions]]
+    {:fx [[:dispatch [:update-opponent-intentions]]
           [:dispatch [:execute-movements]]
-          [:dispatch [:execute-attacks]]]}))
+          [:dispatch [:execute-attacks]]
+          [:dispatch [:update-opponent-intentions]]]}))

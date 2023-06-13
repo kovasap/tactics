@@ -4,7 +4,7 @@
   {:sword
    {:image ""
     :range 1
-    :damage 2}})
+    :damage 6}})
 
 (def utility-items
   {:smoke-bomb {}

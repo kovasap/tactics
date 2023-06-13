@@ -17,10 +17,11 @@
             [cljs.pprint]
             [taoensso.timbre :as log]))
 
-(rf/reg-event-db
+(rf/reg-event-fx
   :app/setup
   (fn [_ _]
-    initial-db))
+    {:db initial-db
+     :fx [[:dispatch [:update-opponent-intentions]]]}))
 
 (rf/reg-sub
  :characters-by-full-name

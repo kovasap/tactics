@@ -99,7 +99,7 @@
 
 (defn calc-damage
   [attacker defender]
-  (min (- (get-weapon-damage attacker) (get-damage-reduction defender)) 0))
+  (max (- (get-weapon-damage attacker) (get-damage-reduction defender)) 0))
 
 (defn get-post-attacks-character
   "Get a character after they were involved in the given attacks."
@@ -109,10 +109,12 @@
           attacks
           :when (= full-name defender-full-name)]
      (fn [character]
-      (update character
-              :health
-              (fnil #(- % (calc-damage attacker defender))
-                    (get-max-health character))))))
+       (-> character
+         (update :health (fnil #(- % (calc-damage attacker defender))
+                              (get-max-health character)))
+         (#(if (> (:health %) 0)
+             %
+             (assoc % :dead true)))))))
    character))
 
 (rf/reg-event-db
