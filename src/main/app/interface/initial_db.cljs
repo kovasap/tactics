@@ -50,4 +50,5 @@
         S   S   S   S   S   F   F   W
         S   S   S   S   S   F   F   W")}]
    :characters        (associate-by :full-name characters)
+   :current-conversation-text "Testing!"
    :current-scene-idx 0})
