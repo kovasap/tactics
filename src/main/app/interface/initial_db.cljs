@@ -35,7 +35,8 @@
 (def initial-db
   {:scenes
    [; {:title :start}
-    {:gridmap
+    {:title "Scenario One"
+     :gridmap
      (parse-gridmap-str-with-characters
        "FM  M   M   F   F   P   P   W  
         W   W   M   F   F   P   P   W
