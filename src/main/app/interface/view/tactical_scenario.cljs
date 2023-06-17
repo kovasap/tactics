@@ -20,14 +20,14 @@
   []
   (let [{:keys [full-name]}  @(rf/subscribe [:hovered-element])
         hovered-element-type @(rf/subscribe [:hovered-element-type])
-        pending-attacks      @(rf/subscribe [:pending-attacks])]
+        intended-attacks      @(rf/subscribe [:intended-attacks])]
     (if (and (= hovered-element-type :character)
-             (not (empty? pending-attacks)))
+             (not (empty? intended-attacks)))
       [:div {:style {:display  "grid"
                      :grid-template-columns "auto auto"
                      :grid-gap "5px"}}
        (into [:div]
-             (for [{:keys [attacker defender]} pending-attacks
+             (for [{:keys [attacker defender]} intended-attacks
                    :when (= full-name (:full-name defender))]
                [:div
                 [:div

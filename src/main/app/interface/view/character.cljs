@@ -11,30 +11,32 @@
 (defn- common-character-view
   [{:keys [image controlled-by-player? has-move-intention? dead] :as character}
    is-intention?]
-  (let [hovered-element @(rf/subscribe [:hovered-element])
-        is-hovered?     (= character hovered-element)
-        under-attack?   (and @(rf/subscribe [:under-attack? character])
-                             (= (boolean has-move-intention?) is-intention?))]
+  (let [hovered-element     @(rf/subscribe [:hovered-element])
+        is-hovered?         (= character hovered-element)
+        next-turn-character @(rf/subscribe [:next-turn-character character])
+        under-attack?       (and @(rf/subscribe [:under-attack? character])
+                                 (= (boolean has-move-intention?)
+                                    is-intention?))]
     (if character
       [:div {:on-mouse-over #(rf/dispatch [:hover-element
                                            :character
                                            character])
              :on-mouse-out  #()
              :style         {:z-index 2}}
-       [:div
-        {:style {:position   "absolute"
-                 :background "white"
-                 :overflow   "visible"
-                 :text-align "left"
-                 :top        50
-                 :z-index    3
-                 :display    (if (and controlled-by-player?
-                                      is-hovered?
-                                      (not dead)
-                                      (= (boolean has-move-intention?)
-                                         is-intention?))
-                               "block"
-                               "none")}}
+       [:div.character {:style {:position   "absolute"
+                                :background "white"
+                                :overflow   "visible"
+                                :text-align "left"
+                                :top        50
+                                :z-index    3
+                                :display    (if (and controlled-by-player?
+                                                     is-hovered?
+                                                     (not dead)
+                                                     (= (boolean
+                                                          has-move-intention?)
+                                                        is-intention?))
+                                              "block"
+                                              "none")}}
         [:button.btn.btn-outline-primary
          {:on-click #(if @(rf/subscribe [:moving-character])
                        (rf/dispatch [:cancel-move])
@@ -46,16 +48,29 @@
                        (rf/dispatch [:begin-attack character]))}
          "Attack"]]
        [character-name character]
-       [:progress.health {:value (get-health character)
-                          :max   (get-max-health character)}]
+       ; [:progress.health {:value (get-health character)
+       ;                    :max   (get-max-health character)]
+       ; [:progress.health {:style {:opacity 0.4}
+       ;                    :value (get-health next-turn-character)
+       ;                    :max   (get-max-health next-turn-character)}]
        [:br]
        (if under-attack? [:span "under attack!"] nil)
-       [:img {:style {:opacity (if is-intention? 0.2 1.0)
+       [:img {:style {:opacity   (if is-intention? 0.2 1.0)
                       :transform (if dead "rotate(90deg)" nil)
-                      :filter  (if under-attack?
-                                 "drop-shadow(0px 0px 20px red)"
-                                 nil)}
-              :src   image}]]
+                      :filter    (if under-attack?
+                                   "drop-shadow(0px 0px 20px red)"
+                                   nil)}
+              :src   image}]
+       [:div {:style {:position "absolute" :z-index 10 :left "80%" :top "50%"
+                      :white-space "nowrap"}}
+        [:div (str (get-health character) " / " (get-max-health character))]
+        [:div "↓"]
+        [:div {:style {:color (if (<= (get-health next-turn-character) 0)
+                                "red"
+                                "black")}}
+         (str (get-health next-turn-character)
+              " / "
+              (get-max-health next-turn-character))]]]
       nil)))
 
 (defn character-view

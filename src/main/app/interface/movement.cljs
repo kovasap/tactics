@@ -154,7 +154,7 @@
                                       :has-intention? false)])))
 
 (rf/reg-event-db
-  :execute-movements
+  :execute-intended-movements
   (fn [{:keys [current-scene-idx ] :as db}]
     (-> db
       (update :characters reset-movement-status)

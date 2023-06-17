@@ -77,7 +77,7 @@
                        target-full-name))
              (-> db
                  (update
-                   :pending-attacks
+                   :intended-attacks
                    #(into []
                           (concat (get-attacks attacking-character
                                                (characters target-full-name))
@@ -141,29 +141,29 @@
       (get-animation-duration attacker :attack))))
 
 (rf/reg-event-db
-  :clear-pending-attacks
+  :clear-intended-attacks
   (fn [db _]
-    (dissoc db :pending-attacks)))
+    (dissoc db :intended-attacks)))
 
 (rf/reg-event-fx
-  :execute-attacks
+  :execute-intended-attacks
   (fn [{:keys [db]} _]
-    {:fx (let [pending-attacks (vector (:pending-attacks db))]
+    {:fx (let [intended-attacks (vector (:intended-attacks db))]
            (vec (concat (for [[i attack] (map-indexed vector
-                                                      (:pending-attacks db))
+                                                      (:intended-attacks db))
                               :let       [current-delay
                                           (get-duration-of-attacks-ms
-                                            (subvec pending-attacks 0 i))]]
+                                            (subvec intended-attacks 0 i))]]
                           [:dispatch-later
                            {:ms       current-delay
                             :dispatch [:execute-attack attack current-delay]}])
-                        [[:dispatch [:clear-pending-attacks]]])))}))
+                        [[:dispatch [:clear-intended-attacks]]])))}))
 
 (rf/reg-sub
   :under-attack?
-  (fn [{:keys [pending-attacks]} [_ {:keys [full-name]}]]
+  (fn [{:keys [intended-attacks]} [_ {:keys [full-name]}]]
     (some #(= full-name %)
-          (map #(:full-name (:defender %)) pending-attacks))))
+          (map #(:full-name (:defender %)) intended-attacks))))
 
 (rf/reg-sub
   :attacking-character
@@ -171,6 +171,6 @@
     (:attacking-character db)))
 
 (rf/reg-sub
-  :pending-attacks
+  :intended-attacks
   (fn [db _]
-    (:pending-attacks db)))
+    (:intended-attacks db)))

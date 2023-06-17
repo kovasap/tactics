@@ -1,4 +1,6 @@
-(ns app.interface.character-stats)
+(ns app.interface.character-stats 
+  (:require
+    [re-frame.core :as rf]))
 
 ; TODO on leveling, have each character gain levels / experience in each
 ; affinity proportional to the number of tiles of that land type they traversed
@@ -13,4 +15,3 @@
   [{:keys [health]
     :as   character}]
   (if health health (get-max-health character)))
- 

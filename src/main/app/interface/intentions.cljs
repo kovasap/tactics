@@ -10,7 +10,7 @@
               execute-movements]]
             [app.interface.attacking
              :refer
-             [get-attacks tile-in-attack-range?]]
+             [get-attacks tile-in-attack-range? get-post-attacks-character]]
             [app.interface.gridmap
              :refer
              [get-adjacent-tiles
@@ -102,7 +102,7 @@
   :update-opponent-attack-intentions
   (fn [{:keys [current-scene-idx characters] :as db}]
     (update db
-            :pending-attacks
+            :intended-attacks
             #(into []
                    (concat %
                            (get-attack-intentions
@@ -119,6 +119,13 @@
   :execute-intentions
   (fn [{:keys [db]} _]
     {:fx [[:dispatch [:update-opponent-intentions]]
-          [:dispatch [:execute-movements]]
-          [:dispatch [:execute-attacks]]
+          [:dispatch [:execute-intended-movements]]
+          [:dispatch [:execute-intended-attacks]]
           [:dispatch [:update-opponent-intentions]]]}))
+
+; Get a version of this character as they will look on the next turn.
+(rf/reg-sub
+  :next-turn-character
+  (fn [{:keys [intended-attacks]} [_ character]]
+    (-> character
+        (get-post-attacks-character intended-attacks))))
