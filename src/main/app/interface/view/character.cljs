@@ -1,7 +1,8 @@
 (ns app.interface.view.character
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
-            [app.interface.character-stats :refer [get-health get-max-health]]))
+            [app.interface.character-stats :refer [get-health get-max-health]]
+            [app.interface.attacking :refer [get-attack-weapon-advantage]]))
 
 (defn character-name
   [{:keys [controlled-by-player? full-name]}]
@@ -11,12 +12,11 @@
 (defn- common-character-view
   [{:keys [image controlled-by-player? has-move-intention? dead] :as character}
    is-intention?]
-  (let [hovered-element     @(rf/subscribe [:hovered-element])
-        is-hovered?         (= character hovered-element)
+  (let [hovered-element @(rf/subscribe [:hovered-element])
+        is-hovered?     (= character hovered-element)
         next-turn-character @(rf/subscribe [:next-turn-character character])
-        under-attack?       (and @(rf/subscribe [:under-attack? character])
-                                 (= (boolean has-move-intention?)
-                                    is-intention?))]
+        attacks         @(rf/subscribe [:attacks-targeting-character
+                                        character])]
     (if character
       [:div {:on-mouse-over #(rf/dispatch [:hover-element
                                            :character
@@ -54,14 +54,24 @@
        ;                    :value (get-health next-turn-character)
        ;                    :max   (get-max-health next-turn-character)}]
        [:br]
-       (if under-attack? [:span "under attack!"] nil)
+       (if (not (empty? attacks)) [:span "under attack!"] nil)
        [:img {:style {:opacity   (if is-intention? 0.2 1.0)
                       :transform (if dead "rotate(90deg)" nil)
-                      :filter    (if under-attack?
+                      :filter    (if (not (empty? attacks))
                                    "drop-shadow(0px 0px 20px red)"
                                    nil)}
               :src   image}]
-       [:div {:style {:position "absolute" :z-index 10 :left "80%" :top "50%"
+       (if (= (boolean has-move-intention?) is-intention?)
+         (into [:div]
+               (for [attack attacks
+                     :let [advantage-holder (get-attack-weapon-advantage attack)]
+                     :when (= advantage-holder :defender)]
+                 "advantage!"))
+         nil)
+       [:div {:style {:position    "absolute"
+                      :z-index     10
+                      :left        "80%"
+                      :top         "50%"
                       :white-space "nowrap"}}
         [:div (str (get-health character) " / " (get-max-health character))]
         [:div "↓"]

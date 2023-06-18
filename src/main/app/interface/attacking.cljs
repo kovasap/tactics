@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             [day8.re-frame.undo :as undo :refer [undoable]]
-            [app.interface.constant-game-data :refer [weapons]]
+            [app.interface.constant-game-data :refer [weapons weapon-advantages]]
             [app.interface.character-stats :refer [get-max-health]]
             [app.interface.animations :refer [get-animation-duration]]
             [app.interface.gridmap
@@ -65,6 +65,14 @@
    ;Counterattack
    {:attacker defender :defender attacker}])
    ; TODO add more attacks based on the character's speed
+
+(defn get-attack-weapon-advantage
+  [{{attacker-weapon :equipped-weapon} :attacker 
+    {defender-weapon :equipped-weapon} :defender}]
+  (cond
+    (contains? (weapon-advantages attacker-weapon) defender-weapon) :attacker
+    (contains? (weapon-advantages defender-weapon) attacker-weapon) :defender
+    :else nil))
    
 (rf/reg-event-fx
   :declare-attack-intention
@@ -160,10 +168,9 @@
                         [[:dispatch [:clear-intended-attacks]]])))}))
 
 (rf/reg-sub
-  :under-attack?
+  :attacks-targeting-character
   (fn [{:keys [intended-attacks]} [_ {:keys [full-name]}]]
-    (some #(= full-name %)
-          (map #(:full-name (:defender %)) intended-attacks))))
+    (filter #(= full-name (:full-name (:defender %))) intended-attacks)))
 
 (rf/reg-sub
   :attacking-character

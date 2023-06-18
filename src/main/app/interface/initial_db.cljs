@@ -21,7 +21,7 @@
     :controlled-by-player? false
     :tiles-already-moved   0
     :character-class       :skirmisher
-    :equipped-weapon       :sword
+    :equipped-weapon       :spear
     :affinities            {:fire 1 :air 3 :earth 2 :water 3 :light 0 :dark 0}
     :image                 "unit-images/merfolk/entangler.png"
     :animations            {:attack

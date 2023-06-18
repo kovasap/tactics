@@ -1,10 +1,14 @@
 (ns app.interface.constant-game-data)
 
+(def weapon-advantages
+  {:sword #{:axe}
+   :spear #{:sword}
+   :axe #{:spear}})
+
 (def weapons
-  {:sword
-   {:image ""
-    :range 1
-    :damage 6}})
+  {:sword {:image "" :range 1 :damage 6}
+   :axe {:image "" :range 1 :damage 8}
+   :spear {:image "" :range 1 :damage 5}})
 
 (def utility-items
   {:smoke-bomb {}
