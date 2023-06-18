@@ -2,7 +2,8 @@
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             [app.interface.character-stats :refer [get-health get-max-health]]
-            [app.interface.view.attacks :refer [defender-hover-attack-view]]))
+            [app.interface.view.attacks :refer [defender-hover-attack-view]]
+            [app.interface.constant-game-data :refer [character-classes weapons]]))
 
 (defn character-name
   [{:keys [controlled-by-player? full-name]}]

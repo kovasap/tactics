@@ -1,5 +1,6 @@
 (ns app.interface.animations
-  (:require [re-frame.core :as rf]))
+  (:require [re-frame.core :as rf]
+            [app.interface.constant-game-data :refer [character-classes]]))
 
 (def time-between-frames-ms 100)
 
@@ -9,18 +10,32 @@
 (rf/reg-event-fx
   :play-animation
   (fn [_
-       [_ {:keys [animations image] :as character}
+       [_ {:keys [class-keyword] :as character}
         animation]]
-    {:fx (into
-           []
-           (for [[i frame] (map-indexed vector
-                                        (conj (animation animations) image))]
-             [:dispatch-later {:ms       (* i time-between-frames-ms)
-                               :dispatch [:update-image character frame]}]))}))
+    (let [image-paths (conj
+                        (for [i (range (animation (:animation-frames
+                                                    (class-keyword
+                                                      character-classes))))]
+                          (str "class-images/"
+                               (name class-keyword)
+                               "/"
+                               (name animation)
+                               "/"
+                               i
+                               ".png"))
+                        (str "class-images/"
+                             (name class-keyword)
+                             "/idle.png"))]
+      {:fx (into []
+                 (for [[i image] (map-indexed vector image-paths)]
+                   [:dispatch-later
+                    {:ms       (* i time-between-frames-ms)
+                     :dispatch [:update-image character image]}]))})))
 
 (defn get-animation-duration
-  [character animation]
-  (* time-between-frames-ms (count (animation (:animations character)))))
+  [{:keys [class-keyword]} animation]
+  (* time-between-frames-ms
+     (animation (:animation-frames (class-keyword character-classes)))))
 
 (rf/reg-event-db
   :update-image

@@ -1,32 +1,35 @@
 (ns app.interface.initial-db
   (:require [app.interface.gridmap :refer [parse-gridmap-str]]
-            [app.interface.utils :refer [associate-by]]))
+            [app.interface.utils :refer [associate-by]]
+            [app.interface.constant-game-data :refer [character-classes]]))
 
 ; Sprites and animations can be found at
 ; https://github.com/wesnoth/wesnoth/tree/master/data/core/images/units
+(defn make-character
+  [{:keys [class-keyword] :as character-map}]
+  (assoc character-map
+    :image (str "unit-images/" (name class-keyword) "idle.png")
+    ; Map from weapon keyword to the current weapon level.
+    :weapon-levels {}
+    :level 1
+    :experiece 0
+    :tiles-already-moved 0))
+
 (def characters
-  [{:full-name           "Main Character"
-    :letter-code         "M"
-    :character-class     :skirmisher
-    :controlled-by-player? true
-    :tiles-already-moved 0
-    :equipped-weapon     :sword-and-shield
-    :affinities          {:fire 1 :air 8 :earth 2 :water 3 :light 0 :dark 0}
-    :image               "unit-images/merfolk/citizen.png"
-    :animations          {:attack ["unit-images/merfolk/citizen-fist-1.png"
-                                   "unit-images/merfolk/citizen-fist-2.png"
-                                   "unit-images/merfolk/citizen-fist-3.png"]}}
-   {:full-name             "Opponent One"
-    :letter-code           "1"
-    :controlled-by-player? false
-    :tiles-already-moved   0
-    :character-class       :skirmisher
-    :equipped-weapon       :spear
-    :affinities            {:fire 1 :air 3 :earth 2 :water 3 :light 0 :dark 0}
-    :image                 "unit-images/merfolk/entangler.png"
-    :animations            {:attack
-                            ["unit-images/merfolk/entangler-defend1.png"
-                             "unit-images/merfolk/entangler-defend2.png"]}}])
+  [(make-character
+     {:full-name "Main Character"
+      :letter-code "M"
+      :class-keyword :skirmisher
+      :controlled-by-player? true
+      :equipped-weapon :sword-and-shield
+      :affinities {:fire 1 :air 8 :earth 2 :water 3 :light 0 :dark 0}})
+   (make-character
+     {:full-name           "Opponent One"
+      :letter-code         "1"
+      :controlled-by-player? false
+      :class-keyword       :skirmisher
+      :equipped-weapon     :spear
+      :affinities          {:fire 1 :air 3 :earth 2 :water 3 :light 0 :dark 0}})])
 
 (defn parse-gridmap-str-with-characters
   [gridmap-str]
