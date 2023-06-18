@@ -67,6 +67,8 @@
      "End turn (enter)"]
     [undo-button]]
    [:br]
+   ; TODO remove this from here
+   [start-scene {}]
    [:br]
    (let [current-scene @(rf/subscribe [:current-scene])]
      (cond
