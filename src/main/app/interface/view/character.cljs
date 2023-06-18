@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             [app.interface.character-stats :refer [get-health get-max-health]]
-            [app.interface.attacking :refer [get-attack-weapon-advantage]]))
+            [app.interface.view.attacks :refer [defender-hover-attack-view]]))
 
 (defn character-name
   [{:keys [controlled-by-player? full-name]}]
@@ -54,7 +54,6 @@
        ;                    :value (get-health next-turn-character)
        ;                    :max   (get-max-health next-turn-character)}]
        [:br]
-       (if (not (empty? attacks)) [:span "under attack!"] nil)
        [:img {:style {:opacity   (if is-intention? 0.2 1.0)
                       :transform (if dead "rotate(90deg)" nil)
                       :filter    (if (not (empty? attacks))
@@ -62,11 +61,13 @@
                                    nil)}
               :src   image}]
        (if (= (boolean has-move-intention?) is-intention?)
-         (into [:div]
-               (for [attack attacks
-                     :let [advantage-holder (get-attack-weapon-advantage attack)]
-                     :when (= advantage-holder :defender)]
-                 "advantage!"))
+         (into [:div {:style {:position    "absolute"
+                              :z-index     8
+                              :left        "35%"
+                              :top         "-10%"
+                              :white-space "nowrap"}}]
+               (for [attack attacks]
+                 [defender-hover-attack-view attack]))
          nil)
        [:div {:style {:position    "absolute"
                       :z-index     10

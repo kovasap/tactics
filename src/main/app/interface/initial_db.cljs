@@ -10,7 +10,7 @@
     :character-class     :skirmisher
     :controlled-by-player? true
     :tiles-already-moved 0
-    :equipped-weapon     :sword
+    :equipped-weapon     :sword-and-shield
     :affinities          {:fire 1 :air 8 :earth 2 :water 3 :light 0 :dark 0}
     :image               "unit-images/merfolk/citizen.png"
     :animations          {:attack ["unit-images/merfolk/citizen-fist-1.png"

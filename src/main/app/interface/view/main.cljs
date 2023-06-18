@@ -66,6 +66,8 @@
     [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:pass-turn])}
      "End turn (enter)"]
     [undo-button]]
+   [:br]
+   [:br]
    (let [current-scene @(rf/subscribe [:current-scene])]
      (cond
        (= :start (:title current-scene)) [start-scene current-scene]

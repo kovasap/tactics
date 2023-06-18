@@ -56,23 +56,28 @@
       (update-in [:scenes current-scene-idx :gridmap] clear-legal-attacks)
       (dissoc :attacking-character))))
 
+(defn- get-attack-weapon-advantage
+  [{attacker-weapon :equipped-weapon} {defender-weapon :equipped-weapon}]
+  (cond
+    (contains? (weapon-advantages attacker-weapon) defender-weapon) :attacker
+    (contains? (weapon-advantages defender-weapon) attacker-weapon) :defender
+    :else nil))
+
+(defn make-attack
+  [attacker defender]
+  {:attacker  attacker
+   :defender  defender
+   :advantage (get-attack-weapon-advantage attacker defender)})
+
 ; TODO group these attacks into rounds so that if one unit is killed by an
 ; attack they don't get a counterattack
 (defn get-attacks
   [attacker defender]
   [; Attack
-   {:attacker attacker :defender defender}
+   (make-attack attacker defender)
    ;Counterattack
-   {:attacker defender :defender attacker}])
+   (make-attack defender attacker)])
    ; TODO add more attacks based on the character's speed
-
-(defn get-attack-weapon-advantage
-  [{{attacker-weapon :equipped-weapon} :attacker 
-    {defender-weapon :equipped-weapon} :defender}]
-  (cond
-    (contains? (weapon-advantages attacker-weapon) defender-weapon) :attacker
-    (contains? (weapon-advantages defender-weapon) attacker-weapon) :defender
-    :else nil))
    
 (rf/reg-event-fx
   :declare-attack-intention
@@ -106,23 +111,26 @@
   water)
 
 (defn calc-damage
-  [attacker defender]
-  (max (- (get-weapon-damage attacker) (get-damage-reduction defender)) 0))
+  [{:keys [attacker defender advantage]}]
+  (max (- (* (if (= advantage :attacker) 2 1)
+             (get-weapon-damage attacker))
+          (get-damage-reduction defender))
+       0))
 
 (defn get-post-attacks-character
   "Get a character after they were involved in the given attacks."
   [{:keys [full-name] :as character} attacks]
   ((apply comp
-    (for [{{defender-full-name :full-name} :defender :keys [attacker defender]}
+    (for [{{defender-full-name :full-name} :defender
+           :as   attack}
           attacks
           :when (= full-name defender-full-name)]
      (fn [character]
-       (-> character
-         (update :health (fnil #(- % (calc-damage attacker defender))
-                              (get-max-health character)))
-         (#(if (> (:health %) 0)
-             %
-             (assoc % :dead true)))))))
+      (-> character
+          (update :health
+                  (fnil #(- % (calc-damage attack))
+                        (get-max-health character)))
+          (#(if (> (:health %) 0) % (assoc % :dead true)))))))
    character))
 
 (rf/reg-event-db
