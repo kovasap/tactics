@@ -21,7 +21,7 @@
                                "/"
                                (name animation)
                                "/"
-                               i
+                               (inc i)
                                ".png"))
                         (str "class-images/"
                              (name class-keyword)
@@ -33,7 +33,7 @@
                      :dispatch [:update-image character image]}]))})))
 
 (defn get-animation-duration
-  [{:keys [class-keyword]} animation]
+  [{:keys [class-keyword] :as character} animation]
   (* time-between-frames-ms
      (animation (:animation-frames (class-keyword character-classes)))))
 

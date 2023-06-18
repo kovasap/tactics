@@ -89,12 +89,10 @@
                        " is intending to attack "
                        target-full-name))
              (-> db
-                 (update
-                   :intended-attacks
-                   #(into []
-                          (concat (get-attacks attacking-character
+                 (update :intended-attacks
+                         #(concat (get-attacks attacking-character
                                                (characters target-full-name))
-                                  %)))
+                                  %))
                  (update-in [:scenes current-scene-idx :gridmap]
                             clear-legal-attacks)
                  (dissoc :attacking-character)))
@@ -164,7 +162,7 @@
 (rf/reg-event-fx
   :execute-intended-attacks
   (fn [{:keys [db]} _]
-    {:fx (let [intended-attacks (vector (:intended-attacks db))]
+    {:fx (let [intended-attacks (:intended-attacks db)]
            (vec (concat (for [[i attack] (map-indexed vector
                                                       (:intended-attacks db))
                               :let       [current-delay

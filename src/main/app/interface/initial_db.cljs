@@ -8,7 +8,7 @@
 (defn make-character
   [{:keys [class-keyword] :as character-map}]
   (assoc character-map
-    :image (str "unit-images/" (name class-keyword) "idle.png")
+    :image (str "class-images/" (name class-keyword) "/idle.png")
     ; Map from weapon keyword to the current weapon level.
     :weapon-levels {}
     :level 1
@@ -27,9 +27,9 @@
      {:full-name           "Opponent One"
       :letter-code         "1"
       :controlled-by-player? false
-      :class-keyword       :skirmisher
-      :equipped-weapon     :spear
-      :affinities          {:fire 1 :air 3 :earth 2 :water 3 :light 0 :dark 0}})])
+      :class-keyword       :assassin
+      :equipped-weapon     :cloak-and-dagger
+      :affinities          {:fire 1 :air 3 :earth 2 :water 3 :light 0 :dark 2}})])
 
 (defn parse-gridmap-str-with-characters
   [gridmap-str]

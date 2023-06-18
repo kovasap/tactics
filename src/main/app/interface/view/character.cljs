@@ -102,10 +102,10 @@
 ; Turn health bar/ratio red if the character can be one shot by an enemy on the
 ; map.
 (defn character-info-view
-  [{:keys [character-class affinities] :as character}]
+  [{:keys [class-keyword affinities] :as character}]
   [:div
    [character-name character]
-   [:p (name character-class)]
+   [:p (name class-keyword)]
    [:p (get-health character) " / " (get-max-health character)]
    [:table
      (into [:tbody]
