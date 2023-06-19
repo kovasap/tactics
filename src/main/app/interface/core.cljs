@@ -30,8 +30,9 @@
 
 (rf/reg-event-fx
   :pass-turn
-  (fn [cofx _]
-    {:fx [[:dispatch [:execute-intentions]]]}))
+  (fn [{:keys [db]} _]
+    {:fx [[:dispatch [:execute-intentions]]
+          [:dispatch [:animate-experience-gains db]]]}))
 
 (rf/reg-event-db
   :advance-scene

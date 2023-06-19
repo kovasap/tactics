@@ -1,15 +1,18 @@
 (ns app.interface.attacking
-  (:require [reagent.core :as r]
-            [re-frame.core :as rf]
-            [day8.re-frame.undo :as undo :refer [undoable]]
-            [app.interface.constant-game-data :refer [weapons weapon-advantages]]
-            [app.interface.character-stats :refer [get-max-health]]
-            [app.interface.animations :refer [get-animation-duration]]
-            [app.interface.gridmap
-             :refer
-             [update-tiles
-              get-characters-current-tile
-              get-characters-current-intention-tile]]))
+  (:require
+    [reagent.core :as r]
+    [re-frame.core :as rf]
+    [day8.re-frame.undo :as undo :refer [undoable]]
+    [app.interface.constant-game-data :refer [weapons weapon-advantages]]
+    [app.interface.character-stats
+     :refer
+     [get-max-health experience-to-next-level]]
+    [app.interface.animations :refer [get-animation-duration]]
+    [app.interface.gridmap
+     :refer
+     [update-tiles
+      get-characters-current-tile
+      get-characters-current-intention-tile]]))
 
 (defn distance
   [{from-row-idx :row-idx from-col-idx :col-idx}
@@ -78,6 +81,8 @@
    ;Counterattack
    (make-attack defender attacker)])
    ; TODO add more attacks based on the character's speed
+;  ; If I do this then I'll have to think about how experience is allocated for
+;  ; these additional attacks.
    
 (rf/reg-event-fx
   :declare-attack-intention
@@ -115,35 +120,68 @@
           (get-damage-reduction defender))
        0))
 
+
+(declare get-experience-from-attack)
+
+(defn get-weapon-level-from-attack
+  [attack]
+  1)
+
 (defn get-post-attacks-character
   "Get a character after they were involved in the given attacks."
   [{:keys [full-name] :as character} attacks]
-  ((apply comp
-    (for [{{defender-full-name :full-name} :defender
-           :as   attack}
-          attacks
-          :when (= full-name defender-full-name)]
-     (fn [character]
-      (-> character
-          (update :health
-                  (fnil #(- % (calc-damage attack))
-                        (get-max-health character)))
-          (#(if (> (:health %) 0) % (assoc % :dead true)))))))
-   character))
+  (->
+    character
+    ; Take damage from attack if you are defending
+    ((apply comp
+      (for [{{defender-full-name :full-name} :defender :as attack} attacks
+            :when (= full-name defender-full-name)]
+       (fn [character]
+        (-> character
+            (update :health
+                    (fnil #(- % (calc-damage attack))
+                          (get-max-health character)))
+            (#(if (> (:health %) 0) % (assoc % :dead true))))))))
+    ; Get experience from attack if you are attacking
+    ((apply comp
+      (for [{{attacker-full-name :full-name :keys [equipped-weapon]} :attacker
+             :as attack}
+            attacks
+            :when (= full-name attacker-full-name)]
+       (fn [character]
+        (let [exp-gained    (get-experience-from-attack attack)
+              levels-gained (int (/ exp-gained experience-to-next-level))
+              new-exp (mod exp-gained experience-to-next-level)]
+         (-> character
+             (assoc :experience new-exp)
+             (update :level #(+ % levels-gained))
+             (update-in [:weapon-levels equipped-weapon]
+                        (fnil #(+ % (get-weapon-level-from-attack attack))
+                              0))))))))))
+
+(defn get-experience-from-attack
+  "Experience the attacker should get from making an attack."
+  [{:keys [attacker defender] :as attack}]
+  (let [post-attack-defender (get-post-attacks-character defender [attack])
+        kill-bonus (if (:dead post-attack-defender) 50 0)]
+    (+ 30 (* 10 (:level defender) (:level attacker)) kill-bonus)))
 
 (rf/reg-event-db
   :execute-attack-stat-change
-  (fn [db [_ {:keys [defender] :as attack}]]
-    (update-in db [:characters (:full-name defender)]
-                  #(get-post-attacks-character % [attack]))))
+  (fn [db [_ {:keys [attacker defender] :as attack}]]
+    (-> db
+      (update-in [:characters (:full-name defender)]
+                 #(get-post-attacks-character % [attack]))
+      (update-in [:characters (:full-name attacker)]
+                 #(get-post-attacks-character % [attack])))))
 
 (rf/reg-event-fx
   :execute-attack
   (fn [_
-       [_ {:keys [attacker] :as   attack}
+       [_ {:keys [attacker] :as attack}
         delay-ms]]
     {:fx [[:dispatch-later {:ms       delay-ms
-                              :dispatch [:play-animation attacker :attack]}]
+                            :dispatch [:play-animation attacker :attack]}]
           [:dispatch-later
            {:ms       (+ delay-ms (get-animation-duration attacker :attack))
             :dispatch [:execute-attack-stat-change attack]}]]}))

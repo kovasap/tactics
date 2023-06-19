@@ -41,3 +41,18 @@
   :update-image
   (fn [db [_ {:keys [full-name]} image-path]]
     (update-in db [:characters full-name] #(assoc % :image image-path))))
+
+
+(def experience-gain-duration-ms)
+
+(rf/reg-event-fx
+  :animate-experience-gains
+  (fn [{:keys [db]} [_ pre-attacks-db]]
+    {:db db
+     :fx []}))
+    ; TODO
+    ; Revert all experience gains to pre-attack-db
+    ; Then, toggle visibility of experience bars on all characters
+    ; Then, find the delta for all experence types for all chararcters between
+    ; the current db and the pre-attacks-db
+    ; Then slowly change the values in the db from pre-attacks to post

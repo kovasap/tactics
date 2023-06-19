@@ -12,7 +12,7 @@
     ; Map from weapon keyword to the current weapon level.
     :weapon-levels {}
     :level 1
-    :experiece 0
+    :experience 0
     :tiles-already-moved 0))
 
 (def characters

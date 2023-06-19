@@ -1,7 +1,8 @@
 (ns app.interface.view.character
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
-            [app.interface.character-stats :refer [get-health get-max-health]]
+            [app.interface.character-stats :refer [get-health get-max-health
+                                                   experience-to-next-level]]
             [app.interface.view.attacks :refer [defender-hover-attack-view]]
             [app.interface.constant-game-data :refer [character-classes weapons]]))
 
@@ -11,7 +12,9 @@
         full-name])
 
 (defn- common-character-view
-  [{:keys [image controlled-by-player? has-move-intention? dead] :as character}
+  [{:keys
+    [experience level image controlled-by-player? has-move-intention? dead]
+    :as character}
    is-intention?]
   (let [hovered-element @(rf/subscribe [:hovered-element])
         is-hovered?     (= character hovered-element)
@@ -49,11 +52,6 @@
                        (rf/dispatch [:begin-attack character]))}
          "Attack"]]
        [character-name character]
-       ; [:progress.health {:value (get-health character)
-       ;                    :max   (get-max-health character)]
-       ; [:progress.health {:style {:opacity 0.4}
-       ;                    :value (get-health next-turn-character)
-       ;                    :max   (get-max-health next-turn-character)}]
        [:br]
        [:img {:style {:opacity   (if is-intention? 0.2 1.0)
                       :transform (if dead "rotate(90deg)" nil)
@@ -70,6 +68,19 @@
                (for [attack attacks]
                  [defender-hover-attack-view attack]))
          nil)
+       ; Experience
+       [:div {:style {:position    "absolute"
+                      :z-index     10
+                      :left        "-20%"
+                      :top         "50%"
+                      :white-space "nowrap"}}
+        [:div (str "Lv" level " " experience " / " experience-to-next-level)]
+        [:div "↓"]
+        [:div
+         (str "Lv" (:level next-turn-character)
+              " "   (:experience next-turn-character)
+              " / " experience-to-next-level)]]
+       ; Health
        [:div {:style {:position    "absolute"
                       :z-index     10
                       :left        "80%"
@@ -77,9 +88,7 @@
                       :white-space "nowrap"}}
         [:div (str (get-health character) " / " (get-max-health character))]
         [:div "↓"]
-        [:div {:style {:color (if (<= (get-health next-turn-character) 0)
-                                "red"
-                                "black")}}
+        [:div {:style {:color (if (:dead next-turn-character) "red" "black")}}
          (str (get-health next-turn-character)
               " / "
               (get-max-health next-turn-character))]]]
@@ -102,11 +111,12 @@
 ; Turn health bar/ratio red if the character can be one shot by an enemy on the
 ; map.
 (defn character-info-view
-  [{:keys [class-keyword affinities] :as character}]
+  [{:keys [class-keyword affinities weapon-levels] :as character}]
   [:div
    [character-name character]
    [:p (name class-keyword)]
    [:p (get-health character) " / " (get-max-health character)]
+   [:p weapon-levels]
    [:table
      (into [:tbody]
            (for [[element affinity] affinities]

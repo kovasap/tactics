@@ -15,3 +15,5 @@
   [{:keys [health]
     :as   character}]
   (if health health (get-max-health character)))
+
+(def experience-to-next-level 100)
