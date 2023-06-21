@@ -32,3 +32,12 @@ Whenever you plan out your character's move (before committing it), you will see
 what all other characters will do in response.
 
 Maybe this ability could be togglable.
+
+## Overworld
+
+Similar to Wargroove, you advance to the next chapter by travelling on an
+overworld.
+However, unlike wargroove, there are more chapters spiderwebbing out into
+different biomes.
+After completing optional chapters in these biomes, NPCs will teach you about
+new classes your characters can now adopt.
