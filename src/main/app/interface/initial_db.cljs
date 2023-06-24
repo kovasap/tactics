@@ -28,6 +28,7 @@
       :letter-code         "1"
       :controlled-by-player? false
       :class-keyword       :assassin
+      :ai-behavior         :attack-in-range
       :equipped-weapon     :cloak-and-dagger
       :affinities          {:fire 1 :air 3 :earth 2 :water 3 :light 0 :dark 2}})])
 

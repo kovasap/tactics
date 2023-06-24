@@ -17,3 +17,7 @@
   (if health health (get-max-health character)))
 
 (def experience-to-next-level 100)
+
+(defn get-tiles-left-to-move
+  [{:keys [tiles-already-moved] {:keys [air]} :affinities}]
+  (- air tiles-already-moved))

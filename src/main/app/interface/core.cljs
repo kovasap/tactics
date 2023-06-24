@@ -5,7 +5,6 @@
             [goog.dom :as gdom]
             [re-frame.core :as rf]
             [reagent.core :as r]
-            [app.interface.sente :refer [send-state-to-server!]]
             [app.interface.view.main :refer [main]]
             [app.interface.utils :refer [get-only]]
             [app.interface.initial-db :refer [initial-db]]
@@ -14,8 +13,7 @@
             [app.interface.attacking]
             [app.interface.intentions]
             [app.interface.keyboard]
-            [cljs.pprint]
-            [taoensso.timbre :as log]))
+            [cljs.pprint]))
 
 (rf/reg-event-fx
   :app/setup

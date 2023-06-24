@@ -2,7 +2,6 @@
   (:require [re-frame.core :as rf]
             [reagent.core :as r]
             ; [ring.middleware.anti-forgery]
-            [app.interface.sente :refer [chsk-state login]]
             [app.interface.view.scenes.start :refer [start-scene]]
             [app.interface.view.tactical-scenario :refer [tactical-scenario]]
             [cljs.pprint]))
@@ -34,24 +33,9 @@
         :style {:margin-right "auto"}}
        "Undo"])))
 
-
-; Not currently necessary/used
-(defn login-field
-  []
-  [:span
-   [:input#input-login {:type :text :placeholder "User-id"}]
-   [:button.btn.btn-outline-primary
-    {:on-click (fn []
-                 (let [user-id (.-value (.getElementById js/document
-                                                         "input-login"))]
-                   (login user-id)))}
-    "Secure login!"]])
-
-
 (defn main
   "Main view for the application."
   []
-  [:div @chsk-state]
   [:div.container
    #_(let [csrf-token (force
                         ring.middleware.anti-forgery/*anti-forgery-token*)]

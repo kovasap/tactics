@@ -1,6 +1,5 @@
 (ns app.interface.attacking
   (:require
-    [reagent.core :as r]
     [re-frame.core :as rf]
     [day8.re-frame.undo :as undo :refer [undoable]]
     [app.interface.constant-game-data :refer [weapons weapon-advantages]]
@@ -11,7 +10,6 @@
     [app.interface.gridmap
      :refer
      [update-tiles
-      get-characters-current-tile
       get-characters-current-intention-tile]]))
 
 (defn distance

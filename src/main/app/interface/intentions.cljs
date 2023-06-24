@@ -1,61 +1,41 @@
 (ns app.interface.intentions
   (:require [re-frame.core :as rf]
-            [app.interface.movement
+            [app.interface.pathfinding
              :refer
-             [get-path
-              declare-move-intention
-              truncate-path
-              get-tiles-left-to-move
-              reset-movement-status
-              execute-movements]]
+             [get-usable-path-to-nearest-player-character
+              get-usable-path-to-nearest-attackable-player-character
+              get-path-usable-by-character]]
+            [app.interface.movement :refer [declare-move-intention]]
             [app.interface.attacking
              :refer
              [get-attacks tile-in-attack-range? get-post-attacks-character]]
             [app.interface.gridmap
              :refer
-             [get-adjacent-tiles
-              get-characters-current-tile
+             [get-characters-current-tile
               get-characters-current-intention-tile
-              update-tiles
               get-tiles]]))
 
 ; TODO add "aggresive" "cautious" and other "personalities" to the AI movement
 ; potentially depending on their element affinity.
 
-(defn get-path-to-nearest-player-character
- [gridmap character characters-by-full-name]
- (first
-  (sort-by
-   count
-   (for [player-character-tile (get-tiles gridmap
-                                          (fn [{:keys [character-full-name]}]
-                                           (:controlled-by-player?
-                                            (characters-by-full-name
-                                             character-full-name))))]
-    (get-path gridmap
-              (or (get-characters-current-intention-tile gridmap
-                                                         character)
-                  (get-characters-current-tile gridmap character))
-              player-character-tile)))))
-
-(defn truncate-occupied-path-steps
-  [path]
-  (if (:intention-character-full-name (last path))
-    (truncate-occupied-path-steps (butlast path))
-    (vec path)))
+; Map of keywords to functions that take in a
+; [gridmap character characters-by-full-name] and return a path the AI
+; character will take.
+(def ai-behaviors
+  {; Always run at the nearest player character and try to attack, no matter
+   ; how far away they are.
+   :aggressive      get-usable-path-to-nearest-player-character
+   ; Only move when an attack is possible from the newly moved to location.
+   :attack-in-range get-usable-path-to-nearest-attackable-player-character})
 
 (defn update-move-intention
- "Returns a gridmap with :intention-character-full-name tile keys filled in."
- [character characters-by-full-name gridmap]
- ((partial declare-move-intention
-           character
-           (truncate-occupied-path-steps
-             (truncate-path (get-path-to-nearest-player-character
-                                   gridmap
-                                   character
-                                   characters-by-full-name)
-                            (get-tiles-left-to-move character))))
-  gridmap))
+  "Returns a gridmap with :intention-character-full-name tile keys filled in."
+  [{:keys [ai-behavior] :as character} characters-by-full-name gridmap]
+  ((partial
+    declare-move-intention
+    character
+    ((ai-behavior ai-behaviors) gridmap character characters-by-full-name))
+   gridmap))
 
 (defn update-move-intentions
   [characters-by-full-name gridmap]

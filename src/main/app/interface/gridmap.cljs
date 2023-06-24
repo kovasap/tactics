@@ -113,7 +113,14 @@
   (filter #(not (nil? %))
     (for [[row-idx-shift col-idx-shift] [[1 0] [0 1] [-1 0] [0 -1]]]
       (get-in gridmap [(+ row-idx row-idx-shift) (+ col-idx col-idx-shift)]))))
-    
+
+
+(defn has-targetable-player-character?
+  [{:keys [intention-character-full-name]} characters-by-full-name]
+  (let [{:keys [dead controlled-by-player?]}
+        (characters-by-full-name intention-character-full-name)]
+    (and (not dead)
+         controlled-by-player?)))
 
 (rf/reg-sub
   :current-gridmap

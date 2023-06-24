@@ -1,49 +1,10 @@
 (ns app.interface.movement
-  (:require [re-frame.core :as rf]
-            [day8.re-frame.undo :as undo :refer [undoable]]  
-            [astar.core :refer [route]]
-            [app.interface.gridmap :refer [get-tiles update-tiles get-characters-current-tile get-adjacent-tiles]]))
-
-(defn get-steps-to-move-to
-  [{{:keys [steps-to-move-through]} :land
-    :keys [character-full-name]}]
-  (cond
-    (nil? steps-to-move-through) 100 ; technically infinity, this is impassible
-    character-full-name 100 ; cannot move to a tile with a character!
-    :else steps-to-move-through))
-
-(defn get-number-of-path-steps
-  [path]
-  (reduce + (for [tile (rest path)] (get-steps-to-move-to tile))))
-
-(defn gridmap->astar-args
-  [gridmap]
-  {:h     (into {} (for [tile (get-tiles gridmap)] [tile 0]))
-   :graph (into {}
-                (for [tile (get-tiles gridmap)]
-                  [tile (get-adjacent-tiles gridmap tile)]))
-   :dist  (fn [_ to-tile] (get-steps-to-move-to to-tile))})
-
-
-(def get-path
- "Returns list of tiles in visited order."
- (memoize
-  (fn [gridmap start-tile end-tile]
-   (let [{:keys [graph h dist]} (gridmap->astar-args gridmap)]
-    (vec (conj (route graph dist h start-tile end-tile) start-tile))))))
-
-
-(defn truncate-path
-  "Takes away tiles from the end of the path until it is under steps."
-  [path steps]
-  (if (>= steps (get-number-of-path-steps path))
-    (vec path)
-    (truncate-path (butlast path) steps))) 
-  
-
-(defn get-tiles-left-to-move
-  [{:keys [tiles-already-moved] {:keys [air]} :affinities}]
-  (- air tiles-already-moved))
+  (:require
+    [re-frame.core :as rf]
+    [day8.re-frame.undo :as undo :refer [undoable]]
+    [app.interface.gridmap :refer [update-tiles get-characters-current-tile]]
+    [app.interface.pathfinding :refer [get-number-of-path-steps get-path]]
+    [app.interface.character-stats :refer [get-tiles-left-to-move]]))
 
 (defn begin-move
  [character gridmap]
