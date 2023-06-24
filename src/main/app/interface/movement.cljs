@@ -4,7 +4,8 @@
     [day8.re-frame.undo :as undo :refer [undoable]]
     [app.interface.gridmap :refer [update-tiles get-characters-current-tile]]
     [app.interface.pathfinding :refer [get-number-of-path-steps get-path]]
-    [app.interface.character-stats :refer [get-tiles-left-to-move]]))
+    [app.interface.character-stats :refer [get-tiles-left-to-move]]
+    [app.interface.attacking :refer [clear-attacks-involving-character]]))
 
 (defn begin-move
  [character gridmap]
@@ -82,12 +83,12 @@
                                                        moving-character)
                path       (get-path gridmap start-tile end-tile)]
            (-> db
+               (#(clear-attacks-involving-character % moving-character))
                (update-in [:scenes current-scene-idx :gridmap]
                           (comp (partial make-move-intention
                                          moving-character
                                          path) 
                                 clear-waypoints))))
-                                
      :fx [[:dispatch [:update-opponent-intentions]]]}))
 
 (rf/reg-event-fx

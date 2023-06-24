@@ -82,6 +82,17 @@
 ;  ; If I do this then I'll have to think about how experience is allocated for
 ;  ; these additional attacks.
    
+(defn clear-attacks-involving-character
+  [db character]
+  (update db
+          :intended-attacks
+          #(filter (fn [{:keys [attacker defender]}]
+                     (not (or (= (:full-name character) (:full-name attacker))
+                              (= (:full-name character)
+                                 (:full-name defender)))))
+             %)))
+  
+
 (rf/reg-event-fx
   :declare-attack-intention
   (undoable "Declare attack intention")
