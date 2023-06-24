@@ -41,3 +41,12 @@ However, unlike wargroove, there are more chapters spiderwebbing out into
 different biomes.
 After completing optional chapters in these biomes, NPCs will teach you about
 new classes your characters can now adopt.
+
+### World Layout
+
+The world is a sprawling continent with six radially distributed regions, each
+with affinity to a different element.
+In the center of the world there is a large region that has no constant dominant
+element, but rather goes through cycles of dominance over time.
+The world has six seasons, one for each element, and the central region is
+swayed to one element or another based on the season.
