@@ -13,7 +13,7 @@
 
 (defn- common-character-view
   [{:keys
-    [experience level image controlled-by-player? has-move-intention? dead]
+    [experience level image controlled-by-player? has-intention? dead]
     :as character}
    is-intention?]
   (let [hovered-element @(rf/subscribe [:hovered-element])
@@ -28,17 +28,13 @@
              :on-mouse-out  #()
              :style         {:z-index 2}}
        [:div.character {:style {:position   "absolute"
-                                :background "white"
                                 :overflow   "visible"
                                 :text-align "left"
                                 :top        50
                                 :z-index    3
                                 :display    (if (and controlled-by-player?
                                                      is-hovered?
-                                                     (not dead)
-                                                     (= (boolean
-                                                          has-move-intention?)
-                                                        is-intention?))
+                                                     (not dead))
                                               "block"
                                               "none")}}
         [:button.btn.btn-outline-primary
@@ -50,7 +46,13 @@
          {:on-click #(if @(rf/subscribe [:attacking-character])
                        (rf/dispatch [:cancel-attack])
                        (rf/dispatch [:begin-attack character]))}
-         "Attack"]]
+         "Attack"]
+        [:button.btn.btn-outline-primary
+         {:on-click #()}
+         "Re-equip"]
+        [:button.btn.btn-outline-primary
+         {:on-click #()}
+         "Utility"]]
        [character-name character]
        [:br]
        [:img {:style {:opacity   (if is-intention? 0.2 1.0)
@@ -59,7 +61,7 @@
                                    "drop-shadow(0px 0px 20px red)"
                                    nil)}
               :src   image}]
-       (if (= (boolean has-move-intention?) is-intention?)
+       (if (= has-intention? is-intention?)
          (into [:div {:style {:position    "absolute"
                               :z-index     8
                               :left        "35%"

@@ -31,6 +31,20 @@
   [gridmap]
   (update-tiles gridmap #(dissoc % :is-legal-move)))
 
+(defn clear-waypoints
+  [gridmap]
+  (update-tiles gridmap
+                (fn [{:keys [waypoint-for]}] waypoint-for)
+                (fn [tile] (dissoc tile :waypoint-for))))
+
+(defn clear-intentions
+  [gridmap full-name]
+  (update-tiles gridmap
+                (fn [{:keys [intention-character-full-name]}]
+                  (= intention-character-full-name full-name))
+                (fn [tile] (dissoc tile :intention-character-full-name))))
+  
+
 (rf/reg-event-db
   :cancel-move
   (fn [{:keys [current-scene-idx] :as db} _]
@@ -39,47 +53,65 @@
       (dissoc :moving-character))))
    
 
-(defn declare-move-intention
+(defn make-move-intention
   [{:keys [full-name]} path gridmap]
-  (if (empty? path)
-    (clear-legal-moves gridmap)
+  (if (> 2 (count path))
+    gridmap
     (let [{from-row-idx :row-idx from-col-idx :col-idx} (first path)
-          steps (subvec path 1 (dec (count path)))
+          steps (subvec path 1 (count path))
           {to-row-idx :row-idx to-col-idx :col-idx} (last path)]
       (->
         gridmap
-        (clear-legal-moves)
         ; Add waypoints
         ((apply comp
           (for [{path-row-idx :row-idx path-col-idx :col-idx} steps]
            #(assoc-in % [path-row-idx path-col-idx :waypoint-for] full-name))))
-        (assoc-in [from-row-idx from-col-idx :intention-character-full-name]
-                  nil)
+        (#(clear-intentions % full-name))
         (assoc-in [to-row-idx to-col-idx :intention-character-full-name]
                   full-name)))))
+
+(defn declare-move-intention
+  [character path gridmap]
+  (clear-legal-moves (make-move-intention character path gridmap)))
+
+(rf/reg-event-fx
+  :preview-move-intention
+  (fn [{{:keys [current-scene-idx moving-character] :as db} :db} [_ end-tile]]
+    {:db (let [gridmap    (get-in db [:scenes current-scene-idx :gridmap])
+               start-tile (get-characters-current-tile gridmap
+                                                       moving-character)
+               path       (get-path gridmap start-tile end-tile)]
+           (-> db
+               (update-in [:scenes current-scene-idx :gridmap]
+                          (comp (partial make-move-intention
+                                         moving-character
+                                         path) 
+                                clear-waypoints))))
+                                
+     :fx [[:dispatch [:update-opponent-intentions]]]}))
 
 (rf/reg-event-fx
   :declare-move-intention
   (undoable "Declare move intention")
   (fn [cofx [_ end-tile]]
     {:db (let [{:keys [current-scene-idx moving-character] :as db} (:db cofx)
-               gridmap      (get-in db [:scenes current-scene-idx :gridmap])
-               start-tile   (get-characters-current-tile gridmap moving-character)
-               path (get-path gridmap start-tile end-tile)]
-           (-> db
-               (update-in [:scenes current-scene-idx :gridmap]
-                          (partial declare-move-intention
-                                   moving-character
-                                   path))
-               (assoc-in [:characters
-                          (:full-name moving-character)
-                          :tiles-already-moved]
-                         (dec (count path)))
-               (assoc-in [:characters
-                          (:full-name moving-character)
-                          :has-intention?]
-                         true)
-               (dissoc :moving-character)))
+               gridmap    (get-in db [:scenes current-scene-idx :gridmap])
+               start-tile (get-characters-current-tile gridmap
+                                                       moving-character)
+               path       (get-path gridmap start-tile end-tile)]
+           (->
+             db
+             (update-in [:scenes current-scene-idx :gridmap]
+                        (partial declare-move-intention moving-character path))
+             (assoc-in [:characters
+                        (:full-name moving-character)
+                        :tiles-already-moved]
+                       (dec (count path)))
+             (assoc-in [:characters
+                        (:full-name moving-character)
+                        :has-intention?]
+                       true)
+             (dissoc :moving-character)))
      :fx [[:dispatch [:update-opponent-intentions]]]}))
 
 (defn character-moved-from-tile?
@@ -98,10 +130,8 @@
       ; remove old positons for moved characters
       (update-tiles character-moved-from-tile?
                     #(dissoc % :character-full-name))
-      ; remove waypoints
       ; TODO if hitting a waypoints triggers any effect, do it here
-      (update-tiles (fn [{:keys [waypoint-for]}] waypoint-for)
-                    (fn [tile] (dissoc tile :waypoint-for)))
+      (clear-waypoints)
       ; add new positions
       (update-tiles
         character-moved-to-tile?

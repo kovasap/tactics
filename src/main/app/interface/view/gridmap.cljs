@@ -13,57 +13,61 @@
 
 
 (defn tile-view
- [{:keys [land
-          row-idx
-          col-idx
-          character-full-name
-          is-legal-move
-          is-legal-attack
-          waypoint-for
-          intention-character-full-name]
-   :as   tile}]
- (let [character (get @(rf/subscribe [:characters-by-full-name])
-                      character-full-name)
-       intention-character (get @(rf/subscribe [:characters-by-full-name])
-                                intention-character-full-name)]
-  [:div.tile {:style         {:font-size    "12px"
-                              :text-align   "center"
-                              :height       tile-size
-                              :width        tile-size
-                              :aspect-ratio "1"
-                              :position     "relative"}
-              :on-mouse-over #(if intention-character-full-name
-                                nil
-                                (rf/dispatch [:hover-element :tile tile]))
-              :on-mouse-out  #()
-              :on-click      #(cond is-legal-move (rf/dispatch
-                                                   [:declare-move-intention
-                                                    tile])
-                                    is-legal-attack (rf/dispatch
-                                                     [:declare-attack-intention
-                                                      character-full-name]))}
-   [:div.background
-    {:style (merge (:style land)
-                   {:width        "100%"
-                    :height       "100%"
-                    :position     "absolute"
-                    :z-index      -1
-                    :border-style (if is-legal-attack "solid" nil)
-                    :border-color (if is-legal-attack "darkred" nil)
-                    :opacity      (if is-legal-move 0.9 0.7)})}]
-   [:div {:style {:position "absolute" :padding-top "10px" :width "100%"}}
-    [:div {:style {:display (if debug "block" "none")}}
-     row-idx
-     ", "
-     col-idx]
-    (if waypoint-for [:span "wp"] nil)
-    #_[:div "intention=" intention-character-full-name
-            [:br]
-            "current=" character-full-name]
-    [character-view character]
-    (if (not (and character-full-name intention-character-full-name))
-      [intention-character-view intention-character]
-      nil)]]))
+  [{:keys [land
+           row-idx
+           col-idx
+           character-full-name
+           is-legal-move
+           is-legal-attack
+           waypoint-for
+           intention-character-full-name]
+    :as   tile}]
+  (let [character (get @(rf/subscribe [:characters-by-full-name])
+                       character-full-name)
+        intention-character (get @(rf/subscribe [:characters-by-full-name])
+                                 intention-character-full-name)]
+    [:div.tile
+     {:style         {:font-size    "12px"
+                      :text-align   "center"
+                      :height       tile-size
+                      :width        tile-size
+                      :aspect-ratio "1"
+                      :position     "relative"}
+      :on-mouse-over #(do (when (not intention-character-full-name) ; why?
+                            (rf/dispatch [:hover-element :tile tile]))
+                          (when is-legal-move
+                           (rf/dispatch [:preview-move-intention tile])))
+      :on-mouse-out  #()
+      :on-click      #(cond is-legal-move   (rf/dispatch
+                                              [:declare-move-intention tile])
+                            is-legal-attack (rf/dispatch
+                                              [:declare-attack-intention
+                                               character-full-name]))}
+     [:div.background
+      {:style (merge (:style land)
+                     {:width        "100%"
+                      :height       "100%"
+                      :position     "absolute"
+                      :z-index      -1
+                      :border-style (if is-legal-attack "solid" nil)
+                      :border-color (if is-legal-attack "darkred" nil)
+                      :opacity      (if is-legal-move 0.9 0.7)})}]
+     [:div {:style {:position "absolute" :padding-top "10px" :width "100%"}}
+      [:div {:style {:display (if debug "block" "none")}}
+       row-idx
+       ", "
+       col-idx]
+      (if waypoint-for [:span "wp"] nil)
+      #_[:div
+         "intention="
+         intention-character-full-name
+         [:br]
+         "current="
+         character-full-name]
+      [character-view character]
+      (if (not (and character-full-name intention-character-full-name))
+        [intention-character-view intention-character]
+        nil)]]))
 
 
 (defn tile-info-view

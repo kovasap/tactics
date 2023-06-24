@@ -34,6 +34,16 @@
     :perlin-cutoff 0.2
     :aspects {:fire 2 :air 1 :earth 0 :water 0 :light 1 :dark 0}
     :style         {:background-color "yellow"}}
+   {:letter        "C"
+    :terrain       :wall
+    :steps-to-move-through nil
+    :aspects {:fire 0 :air 0 :earth 2 :water 0 :light 0 :dark 1}
+    :style         {:background-color "DimGrey"}}
+   {:letter        "R"
+    :terrain       :road
+    :steps-to-move-through 1
+    :aspects {:fire 1 :air 0 :earth 1 :water 0 :light 1 :dark 0}
+    :style         {:background-color "AntiqueWhite"}}
    {:letter        "V"
     :terrain       :void
     :steps-to-move-through nil

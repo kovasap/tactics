@@ -5,7 +5,7 @@
              [get-usable-path-to-nearest-player-character
               get-usable-path-to-nearest-attackable-player-character
               get-path-usable-by-character]]
-            [app.interface.movement :refer [declare-move-intention]]
+            [app.interface.movement :refer [make-move-intention]]
             [app.interface.attacking
              :refer
              [get-attacks tile-in-attack-range? get-post-attacks-character]]
@@ -32,7 +32,7 @@
   "Returns a gridmap with :intention-character-full-name tile keys filled in."
   [{:keys [ai-behavior] :as character} characters-by-full-name gridmap]
   ((partial
-    declare-move-intention
+    make-move-intention
     character
     ((ai-behavior ai-behaviors) gridmap character characters-by-full-name))
    gridmap))
