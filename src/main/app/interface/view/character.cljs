@@ -13,7 +13,7 @@
 
 (defn- common-character-view
   [{:keys
-    [experience level image controlled-by-player? has-intention? dead]
+    [experience level image controlled-by-player? has-intention? dead full-name]
     :as character}
    is-intention?]
   (let [hovered-element @(rf/subscribe [:hovered-element])
@@ -40,13 +40,15 @@
         [:button.btn.btn-outline-primary
          {:on-click #(if @(rf/subscribe [:moving-character])
                        (rf/dispatch [:cancel-move])
-                       (rf/dispatch [:begin-move character]))}
+                       (rf/dispatch [:begin-move full-name]))}
          "Move"]
-        [:button.btn.btn-outline-primary
-         {:on-click #(if @(rf/subscribe [:attacking-character])
-                       (rf/dispatch [:cancel-attack])
-                       (rf/dispatch [:begin-attack character]))}
-         "Attack"]
+        ; Moving into another characters range automatically fights if the
+        ; other character sticks around
+        #_[:button.btn.btn-outline-primary
+           {:on-click #(if @(rf/subscribe [:attacking-character])
+                         (rf/dispatch [:cancel-attack])
+                         (rf/dispatch [:begin-attack character]))}
+           "Attack"]
         [:button.btn.btn-outline-primary
          {:on-click #()}
          "Re-equip"]
@@ -118,7 +120,7 @@
    [character-name character]
    [:p (name class-keyword)]
    [:p (get-health character) " / " (get-max-health character)]
-   [:p weapon-levels]
+   [:p (str weapon-levels)]
    [:table
      (into [:tbody]
            (for [[element affinity] affinities]

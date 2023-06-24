@@ -4,8 +4,7 @@
     [day8.re-frame.undo :as undo :refer [undoable]]
     [app.interface.gridmap :refer [update-tiles get-characters-current-tile]]
     [app.interface.pathfinding :refer [get-number-of-path-steps get-path]]
-    [app.interface.character-stats :refer [get-tiles-left-to-move]]
-    [app.interface.attacking :refer [clear-attacks-involving-character]]))
+    [app.interface.character-stats :refer [get-tiles-left-to-move]]))
 
 (defn begin-move
  [character gridmap]
@@ -19,14 +18,23 @@
        (get-number-of-path-steps (get-path gridmap from-tile tile))))
    #(assoc % :is-legal-move true))))
 
+(defn reset-movement-status
+  [characters]
+  (into {}
+        (for [[full-name character] characters]
+          [full-name (assoc character :tiles-already-moved 0
+                                      :has-intention? false)])))
+
 (rf/reg-event-db
   :begin-move
   (undoable "Begin Move")
-  (fn [{:keys [current-scene-idx] :as db} [_ character]]
-    (-> db
-      (update-in [:scenes current-scene-idx :gridmap]
-                 (partial begin-move character))
-      (assoc :moving-character character))))
+  (fn [{:keys [current-scene-idx] :as db} [_ full-name]]
+    (let [{:keys [characters] :as updated-character-db}
+          (update db :characters reset-movement-status)]
+      (-> updated-character-db
+          (update-in [:scenes current-scene-idx :gridmap]
+                     (partial begin-move (characters full-name)))
+          (assoc :moving-character (characters full-name))))))
 
 (defn clear-legal-moves
   [gridmap]
@@ -83,7 +91,6 @@
                                                        moving-character)
                path       (get-path gridmap start-tile end-tile)]
            (-> db
-               (#(clear-attacks-involving-character % moving-character))
                (update-in [:scenes current-scene-idx :gridmap]
                           (comp (partial make-move-intention
                                          moving-character
@@ -138,18 +145,11 @@
         character-moved-to-tile?
         #(assoc % :character-full-name (:intention-character-full-name %)))))
 
-(defn reset-movement-status
-  [characters]
-  (into {}
-        (for [[full-name character] characters]
-          [full-name (assoc character :tiles-already-moved 0
-                                      :has-intention? false)])))
 
 (rf/reg-event-db
   :execute-intended-movements
-  (fn [{:keys [current-scene-idx ] :as db}]
+  (fn [{:keys [current-scene-idx] :as db}]
     (-> db
-      (update :characters reset-movement-status)
       (update-in [:scenes current-scene-idx :gridmap] execute-movements))))
 
 (rf/reg-sub

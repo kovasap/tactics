@@ -39,18 +39,23 @@
                            (rf/dispatch [:preview-move-intention tile])))
       :on-mouse-out  #()
       :on-click      #(cond is-legal-move   (rf/dispatch
-                                              [:declare-move-intention tile])
-                            is-legal-attack (rf/dispatch
-                                              [:declare-attack-intention
-                                               character-full-name]))}
+                                              [:declare-move-intention tile]))}
+                            ; Moving into another characters range
+                            ; automatically fights if the other character
+                            ; sticks around
+                            ; is-legal-attack (rf/dispatch
+                            ;                   [:declare-attack-intention
+                            ;                    character-full-name]))}
      [:div.background
       {:style (merge (:style land)
                      {:width        "100%"
                       :height       "100%"
                       :position     "absolute"
                       :z-index      -1
-                      :border-style (if is-legal-attack "solid" nil)
-                      :border-color (if is-legal-attack "darkred" nil)
+                      ; Moving into another characters range automatically
+                      ; fights if the other character sticks around
+                      ; :border-style (if is-legal-attack "solid" nil)
+                      ; :border-color (if is-legal-attack "darkred" nil)
                       :opacity      (if is-legal-move 0.9 0.7)})}]
      [:div {:style {:position "absolute" :padding-top "10px" :width "100%"}}
       [:div {:style {:display (if debug "block" "none")}}
@@ -58,12 +63,6 @@
        ", "
        col-idx]
       (if waypoint-for [:span "wp"] nil)
-      #_[:div
-         "intention="
-         intention-character-full-name
-         [:br]
-         "current="
-         character-full-name]
       [character-view character]
       (if (not (and character-full-name intention-character-full-name))
         [intention-character-view intention-character]

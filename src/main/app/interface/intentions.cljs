@@ -1,19 +1,26 @@
 (ns app.interface.intentions
-  (:require [re-frame.core :as rf]
-            [app.interface.pathfinding
-             :refer
-             [get-usable-path-to-nearest-player-character
-              get-usable-path-to-nearest-attackable-player-character
-              get-path-usable-by-character]]
-            [app.interface.movement :refer [make-move-intention]]
-            [app.interface.attacking
-             :refer
-             [get-attacks tile-in-attack-range? get-post-attacks-character]]
-            [app.interface.gridmap
-             :refer
-             [get-characters-current-tile
-              get-characters-current-intention-tile
-              get-tiles]]))
+  (:require
+    [re-frame.core :as rf]
+    [app.interface.pathfinding
+     :refer
+     [get-usable-path-to-nearest-player-character
+      get-usable-path-to-nearest-attackable-player-character
+      get-path-usable-by-character]]
+    [app.interface.movement :refer [make-move-intention]]
+    [app.interface.character-stats :refer [get-speed]]
+    [app.interface.re-frame-utils :refer [dispatch-sequentially-with-timings]]
+    [app.interface.attacking
+     :refer
+     [get-attacks
+      tile-in-attack-range?
+      get-post-attacks-character
+      get-duration-of-attacks-ms
+      filter-dead-attacks]]
+    [app.interface.gridmap
+     :refer
+     [get-characters-current-tile
+      get-characters-current-intention-tile
+      get-tiles]]))
 
 ; TODO add "aggresive" "cautious" and other "personalities" to the AI movement
 ; potentially depending on their element affinity.
@@ -63,13 +70,14 @@
 
 (defn get-attack-intentions
   [gridmap characters-by-full-name]
-  (reduce concat
-    (for [attacker (vals characters-by-full-name)
-          :let     [target-full-name (get-attack-target-full-name gridmap attacker)]
-          :when    (and (not (nil? target-full-name))
-                        (not (:dead attacker))
-                        (not (:controlled-by-player? attacker)))]
-      (get-attacks attacker (characters-by-full-name target-full-name)))))
+  (vec
+    (reduce concat
+      (for [attacker (sort-by get-speed (vals characters-by-full-name))
+            :let     [target-full-name (get-attack-target-full-name gridmap
+                                                                    attacker)]
+            :when    (and (not (nil? target-full-name))
+                          (not (:controlled-by-player? attacker)))]
+        (get-attacks attacker (characters-by-full-name target-full-name))))))
 
 
 (rf/reg-event-db
@@ -81,13 +89,14 @@
 (rf/reg-event-db
   :update-opponent-attack-intentions
   (fn [{:keys [current-scene-idx characters] :as db}]
-    (update db
-            :intended-attacks
-            #(into []
-                   (concat %
-                           (get-attack-intentions
-                             (get-in db [:scenes current-scene-idx :gridmap])
-                             characters))))))
+    (assoc db
+      :intended-attacks (filter-dead-attacks
+                          (vals characters)
+                          (get-attack-intentions (get-in db
+                                                         [:scenes
+                                                          current-scene-idx
+                                                          :gridmap])
+                                                 characters)))))
 
 (rf/reg-event-fx
   :update-opponent-intentions
@@ -98,10 +107,12 @@
 (rf/reg-event-fx
   :execute-intentions
   (fn [{:keys [db]} _]
-    {:fx [[:dispatch [:update-opponent-intentions]]
-          [:dispatch [:execute-intended-movements]]
-          [:dispatch [:execute-intended-attacks]]
-          [:dispatch [:update-opponent-intentions]]]}))
+    {:fx (dispatch-sequentially-with-timings
+           [[[:update-opponent-intentions] 10]
+            [[:execute-intended-movements] 10]
+            [[:execute-intended-attacks]
+             (get-duration-of-attacks-ms (:intended-attacks db))]
+            [[:update-opponent-intentions] 10]])}))
 
 ; Get a version of this character as they will look on the next turn.
 (rf/reg-sub

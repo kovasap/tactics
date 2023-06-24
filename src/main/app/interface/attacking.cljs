@@ -2,15 +2,15 @@
   (:require
     [re-frame.core :as rf]
     [day8.re-frame.undo :as undo :refer [undoable]]
+    [app.interface.re-frame-utils :refer [dispatch-sequentially-with-timings]]
     [app.interface.constant-game-data :refer [weapons weapon-advantages]]
     [app.interface.character-stats
      :refer
-     [get-max-health experience-to-next-level]]
+     [get-max-health get-speed experience-to-next-level]]
     [app.interface.animations :refer [get-animation-duration]]
     [app.interface.gridmap
      :refer
-     [update-tiles
-      get-characters-current-intention-tile]]))
+     [update-tiles get-characters-current-intention-tile]]))
 
 (defn distance
   [{from-row-idx :row-idx from-col-idx :col-idx}
@@ -28,34 +28,40 @@
      (distance character-tile tile)
      0))
   
-(defn begin-attack
-  [character gridmap]
-  (update-tiles gridmap
-                (partial tile-in-attack-range?
-                         character
-                         (get-characters-current-intention-tile gridmap
-                                                                character))
-                #(assoc % :is-legal-attack true)))
+; Moving into another characters range automatically fights if the other
+; character sticks around
+#_(defn begin-attack
+    [character gridmap]
+    (update-tiles gridmap
+                  (partial tile-in-attack-range?
+                           character
+                           (get-characters-current-intention-tile gridmap
+                                                                  character))
+                  #(assoc % :is-legal-attack true)))
 
-(rf/reg-event-db
-  :begin-attack
-  (undoable "Begin Attack")
-  (fn [{:keys [current-scene-idx] :as db} [_ character]]
-    (-> db
-      (update-in [:scenes current-scene-idx :gridmap]
-                 (partial begin-attack character))
-      (assoc :attacking-character character))))
+; Moving into another characters range automatically fights if the other
+; character sticks around
+#_(rf/reg-event-db
+    :begin-attack
+    (undoable "Begin Attack")
+    (fn [{:keys [current-scene-idx] :as db} [_ character]]
+      (-> db
+        (update-in [:scenes current-scene-idx :gridmap]
+                   (partial begin-attack character))
+        (assoc :attacking-character character))))
 
-(defn clear-legal-attacks
-  [gridmap]
-  (update-tiles gridmap #(dissoc % :is-legal-attack)))
+#_(defn clear-legal-attacks
+    [gridmap]
+    (update-tiles gridmap #(dissoc % :is-legal-attack)))
 
-(rf/reg-event-db
-  :cancel-attack
-  (fn [{:keys [current-scene-idx] :as db} _]
-    (-> db
-      (update-in [:scenes current-scene-idx :gridmap] clear-legal-attacks)
-      (dissoc :attacking-character))))
+; Moving into another characters range automatically fights if the other
+; character sticks around
+#_(rf/reg-event-db
+    :cancel-attack
+    (fn [{:keys [current-scene-idx] :as db} _]
+      (-> db
+        (update-in [:scenes current-scene-idx :gridmap] clear-legal-attacks)
+        (dissoc :attacking-character))))
 
 (defn- get-attack-weapon-advantage
   [{attacker-weapon :equipped-weapon} {defender-weapon :equipped-weapon}]
@@ -70,47 +76,39 @@
    :defender  defender
    :advantage (get-attack-weapon-advantage attacker defender)})
 
-; TODO group these attacks into rounds so that if one unit is killed by an
-; attack they don't get a counterattack
 (defn get-attacks
   [attacker defender]
-  [; Attack
-   (make-attack attacker defender)
-   ;Counterattack
-   (make-attack defender attacker)])
-   ; TODO add more attacks based on the character's speed
-;  ; If I do this then I'll have to think about how experience is allocated for
-;  ; these additional attacks.
+  (let [advantage-holder (get-attack-weapon-advantage attacker defender)
+        attacker-speed (get-speed attacker)
+        defender-speed (get-speed defender)
+        attack (make-attack attacker defender)
+        counterattack (make-attack defender attacker)]
+    (cond (= advantage-holder :attacker) [attack counterattack]
+          (= advantage-holder :defender) [counterattack attack]
+          :else (cond (> attacker-speed defender-speed) [attack counterattack]
+                      (> defender-speed attacker-speed) [counterattack attack]
+                      :else [attack counterattack]))))
    
-(defn clear-attacks-involving-character
-  [db character]
-  (update db
-          :intended-attacks
-          #(filter (fn [{:keys [attacker defender]}]
-                     (not (or (= (:full-name character) (:full-name attacker))
-                              (= (:full-name character)
-                                 (:full-name defender)))))
-             %)))
-  
-
-(rf/reg-event-fx
-  :declare-attack-intention
-  (undoable "Declare attack intention")
-  (fn [{:keys [db]
-        {:keys [current-scene-idx attacking-character characters]} :db}
-       [_ target-full-name]]
-    {:db (do (prn (str attacking-character
-                       " is intending to attack "
-                       target-full-name))
-             (-> db
-                 (update :intended-attacks
-                         #(concat (get-attacks attacking-character
-                                               (characters target-full-name))
-                                  %))
-                 (update-in [:scenes current-scene-idx :gridmap]
-                            clear-legal-attacks)
-                 (dissoc :attacking-character)))
-     :fx [[:dispatch [:update-opponent-intentions]]]}))
+; Moving into another characters range automatically fights if the other
+; character sticks around
+#_(rf/reg-event-fx
+    :declare-attack-intention
+    (undoable "Declare attack intention")
+    (fn [{:keys [db]
+          {:keys [current-scene-idx attacking-character characters]} :db}
+         [_ target-full-name]]
+      {:db (do (prn (str attacking-character
+                         " is intending to attack "
+                         target-full-name))
+               (-> db
+                   (update :intended-attacks
+                           #(concat (get-attacks attacking-character
+                                                 (characters target-full-name))
+                                    %))
+                   (update-in [:scenes current-scene-idx :gridmap]
+                              clear-legal-attacks)
+                   (dissoc :attacking-character)))
+       :fx [[:dispatch [:update-opponent-intentions]]]}))
 
 
 (defn get-weapon-damage
@@ -186,13 +184,10 @@
 
 (rf/reg-event-fx
   :execute-attack
-  (fn [_
-       [_ {:keys [attacker] :as attack}
-        delay-ms]]
-    {:fx [[:dispatch-later {:ms       delay-ms
-                            :dispatch [:play-animation attacker :attack]}]
+  (fn [_ [_ {:keys [attacker] :as attack}]]
+    {:fx [[:dispatch [:play-animation attacker :attack]]
           [:dispatch-later
-           {:ms       (+ delay-ms (get-animation-duration attacker :attack))
+           {:ms       (get-animation-duration attacker :attack)
             :dispatch [:execute-attack-stat-change attack]}]]}))
 
 (defn get-duration-of-attacks-ms
@@ -201,24 +196,48 @@
     (for [{:keys [attacker]} attacks]
       (get-animation-duration attacker :attack))))
 
-(rf/reg-event-db
-  :clear-intended-attacks
-  (fn [db _]
-    (dissoc db :intended-attacks)))
+#_(rf/reg-event-db
+    :clear-intended-attacks
+    (fn [db _]
+      (dissoc db :intended-attacks)))
+
+(defn remove-at-idx
+  "Remove the element at the given index in the given vector."
+  [idx coll]
+  (into (subvec coll 0 idx) (subvec coll (inc idx))))
+
+(defn filter-dead-attacks
+  "Go through attacks in sequence, removing all attacks that contain characters
+  that were killed by previous attacks."
+  ([characters attacks]
+   (assert (vector? attacks))
+   (filter-dead-attacks characters attacks 0))
+  ([characters attacks cur-attack-idx]
+   (let [dead-character-names (set (map :full-name (filter :dead characters)))
+         cur-attack (get attacks cur-attack-idx)
+         cur-attack-involves-dead-characters
+         (or (dead-character-names (:full-name (:attacker cur-attack)))
+             (dead-character-names (:full-name (:defender cur-attack))))]
+     (cond
+       (nil? cur-attack) attacks
+       cur-attack-involves-dead-characters
+         (filter-dead-attacks characters
+                              (remove-at-idx cur-attack-idx attacks)
+                              cur-attack-idx)
+       :else (filter-dead-attacks (for [character characters]
+                                    (get-post-attacks-character character
+                                                                [cur-attack]))
+                                  attacks
+                                  (inc cur-attack-idx))))))
 
 (rf/reg-event-fx
   :execute-intended-attacks
   (fn [{:keys [db]} _]
-    {:fx (let [intended-attacks (:intended-attacks db)]
-           (vec (concat (for [[i attack] (map-indexed vector
-                                                      (:intended-attacks db))
-                              :let       [current-delay
-                                          (get-duration-of-attacks-ms
-                                            (subvec intended-attacks 0 i))]]
-                          [:dispatch-later
-                           {:ms       current-delay
-                            :dispatch [:execute-attack attack current-delay]}])
-                        [[:dispatch [:clear-intended-attacks]]])))}))
+    {:fx 
+     (dispatch-sequentially-with-timings
+       (for [{:keys [attacker] :as attack} (:intended-attacks db)]
+         [[:execute-attack attack] (get-animation-duration attacker :attack)]))}))
+     ; [[:dispatch [:clear-intended-attacks]]])))}))
 
 (rf/reg-sub
   :attacks-targeting-character

@@ -16,6 +16,10 @@
     :as   character}]
   (if health health (get-max-health character)))
 
+(defn get-speed
+  [character]
+  (* 1 (:air (:affinities character))))
+
 (def experience-to-next-level 100)
 
 (defn get-tiles-left-to-move

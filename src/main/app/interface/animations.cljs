@@ -1,8 +1,10 @@
 (ns app.interface.animations
-  (:require [re-frame.core :as rf]
-            [app.interface.constant-game-data :refer [character-classes]]))
+  (:require
+    [re-frame.core :as rf]
+    [app.interface.re-frame-utils :refer [dispatch-sequentially-with-timings]]
+    [app.interface.constant-game-data :refer [character-classes]]))
 
-(def time-between-frames-ms 100)
+(def time-between-frames-ms 80)
 
 ; TODO add movement of the actual character to this via some kind of offset
 ; parameter, so that the character moves in the direction of e.g. their
@@ -26,11 +28,10 @@
                         (str "class-images/"
                              (name class-keyword)
                              "/idle.png"))]
-      {:fx (into []
-                 (for [[i image] (map-indexed vector image-paths)]
-                   [:dispatch-later
-                    {:ms       (* i time-between-frames-ms)
-                     :dispatch [:update-image character image]}]))})))
+      {:fx (dispatch-sequentially-with-timings
+             (for [image image-paths]
+              [[:update-image character image]
+               time-between-frames-ms]))})))
 
 (defn get-animation-duration
   [{:keys [class-keyword] :as character} animation]
