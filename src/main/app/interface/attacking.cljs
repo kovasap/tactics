@@ -166,6 +166,7 @@
                         (fnil #(+ % (get-weapon-level-from-attack attack))
                               0))))))))))
 
+; See https://fireemblemwiki.org/wiki/Experience for inspiration
 (defn get-experience-from-attack
   "Experience the attacker should get from making an attack."
   [{:keys [attacker defender] :as attack}]

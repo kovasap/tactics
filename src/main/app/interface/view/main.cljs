@@ -5,6 +5,7 @@
             [app.interface.view.scenes.start :refer [start-scene]]
             [app.interface.view.overworld :refer [overworld]]
             [app.interface.view.tactical-scenario :refer [tactical-scenario]]
+            [app.interface.view.conversation-overlay :refer [conversation-overlay]]
             [cljs.pprint]))
 
 (rf/reg-sub
@@ -49,6 +50,7 @@
     [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:pass-turn])}
      "End turn (enter)"]
     [undo-button]]
+   [conversation-overlay]
    [:br]
    (let [[scene-name scene] @(rf/subscribe [:current-scene])]
      (cond

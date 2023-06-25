@@ -1,19 +1,21 @@
 (ns app.interface.core
-  (:require ["react-dom/client" :refer [createRoot]]
-            [day8.re-frame.http-fx]
-            [day8.re-frame.undo :as undo :refer [undoable]]  
-            [goog.dom :as gdom]
-            [re-frame.core :as rf]
-            [reagent.core :as r]
-            [app.interface.view.main :refer [main]]
-            [app.interface.utils :refer [get-only]]
-            [app.interface.initial-db :refer [initial-db]]
-            ; Included just so reframe events are picked up
-            [app.interface.movement]
-            [app.interface.attacking]
-            [app.interface.intentions]
-            [app.interface.keyboard]
-            [cljs.pprint]))
+  (:require
+    ["react-dom/client" :refer [createRoot]]
+    [day8.re-frame.http-fx]
+    [day8.re-frame.undo :as undo :refer [undoable]]
+    [goog.dom :as gdom]
+    [re-frame.core :as rf]
+    [reagent.core :as r]
+    [app.interface.view.main :refer [main]]
+    [app.interface.utils :refer [get-only]]
+    [app.interface.initial-db :refer [initial-db]]
+    ; Included just so reframe events are picked up
+    [app.interface.movement]
+    [app.interface.dialogue]
+    [app.interface.attacking]
+    [app.interface.intentions]
+    [app.interface.keyboard]
+    [cljs.pprint]))
 
 (rf/reg-event-fx
   :app/setup
@@ -37,11 +39,14 @@
     {:fx [[:dispatch [:execute-intentions]]
           [:dispatch [:animate-experience-gains db]]]}))
 
-(rf/reg-event-db
+(rf/reg-event-fx
   :go-to-scene
   (undoable "Moving to scene")
-  (fn [db [_ scene-name]]
-    (assoc db :current-scene scene-name)))
+  (fn [{:keys [db]} [_ scene-name]]
+    {:db (assoc db :current-scene scene-name)
+     :fx [[:dispatch
+           [:update-dialogue
+            (get-in db [:scenes scene-name :intro-dialogue])]]]}))
 
 (rf/reg-sub
   :chapter-scenes

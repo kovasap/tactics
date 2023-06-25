@@ -56,7 +56,16 @@
    {:overworld {}
     :start {}
     :scenario-1
-    {:gridmap
+    {:intro-dialogue [{:character-full-name "Main Character"
+                       :text "Here we can start our journey"}
+                      {:character-full-name "Main Character"
+                       :text {:fire  "Let's move!"
+                              :dark  "Let's get going!"
+                              :air   "Catch me if you can!"
+                              :earth "Give me that pack."
+                              :water "..."
+                              :light "I can see the trail"}}]
+     :gridmap
      (parse-gridmap-str-with-characters
        "FM  M   M   R   F   P   P   W  
         M   W   M   R   F   P   P   W
@@ -71,5 +80,5 @@
         S   S   S   S   S   F   F   W")
      :location-on-map ["500" "400"]}}
    :characters (associate-by :full-name characters)
-   :current-conversation-text "Testing!"
+   :dialogue-queue '()
    :current-scene :overworld})
