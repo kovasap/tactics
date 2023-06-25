@@ -80,13 +80,12 @@
 
 
 (defn gridmap-view
-  []
-  (let [gridmap @(rf/subscribe [:current-gridmap])]
-    (into [:div.gridmap
-           {:style {:display  "grid"
-                    :grid-template-columns (st/join " "
-                                                    (for [_ (first gridmap)]
-                                                      tile-size))
-                    :grid-gap "1px"}}]
-          (reduce concat
-            (for [column gridmap] (for [tile column] (tile-view tile)))))))
+  [gridmap]
+  (into [:div.gridmap
+         {:style {:display  "grid"
+                  :grid-template-columns (st/join " "
+                                                  (for [_ (first gridmap)]
+                                                    tile-size))
+                  :grid-gap "1px"}}]
+        (reduce concat
+          (for [column gridmap] (for [tile column] (tile-view tile))))))

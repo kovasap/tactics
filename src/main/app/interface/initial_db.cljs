@@ -53,9 +53,10 @@
 
 (def initial-db
   {:scenes
-   [; {:title :start}
-    {:title "Scenario One"
-     :gridmap
+   {:overworld {}
+    :start {}
+    :scenario-1
+    {:gridmap
      (parse-gridmap-str-with-characters
        "FM  M   M   R   F   P   P   W  
         M   W   M   R   F   P   P   W
@@ -67,7 +68,8 @@
         W   M   M   W   W   W   F   W
         S   M   S   S   W   F   F   W
         S   S   S   S3  S   F   F   W
-        S   S   S   S   S   F   F   W")}]
-   :characters        (associate-by :full-name characters)
+        S   S   S   S   S   F   F   W")
+     :location-on-map ["500" "400"]}}
+   :characters (associate-by :full-name characters)
    :current-conversation-text "Testing!"
-   :current-scene-idx 0})
+   :current-scene :overworld})

@@ -82,19 +82,19 @@
 
 (rf/reg-event-db
   :update-opponent-move-intentions
-  (fn [{:keys [current-scene-idx characters] :as db}]
-     (update-in db [:scenes current-scene-idx :gridmap]
+  (fn [{:keys [current-scene characters] :as db}]
+     (update-in db [:scenes current-scene :gridmap]
                 (partial update-move-intentions characters))))
 
 (rf/reg-event-db
   :update-opponent-attack-intentions
-  (fn [{:keys [current-scene-idx characters] :as db}]
+  (fn [{:keys [current-scene characters] :as db}]
     (assoc db
       :intended-attacks (filter-dead-attacks
                           (vals characters)
                           (get-attack-intentions (get-in db
                                                          [:scenes
-                                                          current-scene-idx
+                                                          current-scene
                                                           :gridmap])
                                                  characters)))))
 

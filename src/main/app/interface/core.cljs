@@ -26,6 +26,11 @@
  (fn [db _]
    (:characters db)))
 
+(rf/reg-sub
+ :party-characters
+ (fn [db _]
+   (filter :controlled-by-player? (vals (:characters db)))))
+
 (rf/reg-event-fx
   :pass-turn
   (fn [{:keys [db]} _]
@@ -33,15 +38,22 @@
           [:dispatch [:animate-experience-gains db]]]}))
 
 (rf/reg-event-db
-  :advance-scene
-  (undoable "Advancing scene")
-  (fn [db _]
-    (update db :current-scene-idx inc)))
+  :go-to-scene
+  (undoable "Moving to scene")
+  (fn [db [_ scene-name]]
+    (assoc db :current-scene scene-name)))
+
+(rf/reg-sub
+  :chapter-scenes
+  (fn [{:keys [scenes]} _]
+    (into {} (for [[scene-name scene] scenes
+                   :when (:location-on-map scene)]
+              [scene-name scene]))))
 
 (rf/reg-sub
   :current-scene
-  (fn [db _]
-    (get (:scenes db) (:current-scene-idx db))))
+  (fn [{:keys [current-scene scenes]} _]
+    [current-scene (current-scene scenes)]))
 
 (rf/reg-event-db
   :message

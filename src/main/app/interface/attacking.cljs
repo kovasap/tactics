@@ -44,9 +44,9 @@
 #_(rf/reg-event-db
     :begin-attack
     (undoable "Begin Attack")
-    (fn [{:keys [current-scene-idx] :as db} [_ character]]
+    (fn [{:keys [current-scene] :as db} [_ character]]
       (-> db
-        (update-in [:scenes current-scene-idx :gridmap]
+        (update-in [:scenes current-scene :gridmap]
                    (partial begin-attack character))
         (assoc :attacking-character character))))
 
@@ -58,9 +58,9 @@
 ; character sticks around
 #_(rf/reg-event-db
     :cancel-attack
-    (fn [{:keys [current-scene-idx] :as db} _]
+    (fn [{:keys [current-scene] :as db} _]
       (-> db
-        (update-in [:scenes current-scene-idx :gridmap] clear-legal-attacks)
+        (update-in [:scenes current-scene :gridmap] clear-legal-attacks)
         (dissoc :attacking-character))))
 
 (defn- get-attack-weapon-advantage
@@ -95,7 +95,7 @@
     :declare-attack-intention
     (undoable "Declare attack intention")
     (fn [{:keys [db]
-          {:keys [current-scene-idx attacking-character characters]} :db}
+          {:keys [current-scene attacking-character characters]} :db}
          [_ target-full-name]]
       {:db (do (prn (str attacking-character
                          " is intending to attack "
@@ -105,7 +105,7 @@
                            #(concat (get-attacks attacking-character
                                                  (characters target-full-name))
                                     %))
-                   (update-in [:scenes current-scene-idx :gridmap]
+                   (update-in [:scenes current-scene :gridmap]
                               clear-legal-attacks)
                    (dissoc :attacking-character)))
        :fx [[:dispatch [:update-opponent-intentions]]]}))

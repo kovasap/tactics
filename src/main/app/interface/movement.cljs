@@ -28,11 +28,11 @@
 (rf/reg-event-db
   :begin-move
   (undoable "Begin Move")
-  (fn [{:keys [current-scene-idx] :as db} [_ full-name]]
+  (fn [{:keys [current-scene] :as db} [_ full-name]]
     (let [{:keys [characters] :as updated-character-db}
           (update db :characters reset-movement-status)]
       (-> updated-character-db
-          (update-in [:scenes current-scene-idx :gridmap]
+          (update-in [:scenes current-scene :gridmap]
                      (partial begin-move (characters full-name)))
           (assoc :moving-character (characters full-name))))))
 
@@ -56,9 +56,9 @@
 
 (rf/reg-event-db
   :cancel-move
-  (fn [{:keys [current-scene-idx] :as db} _]
+  (fn [{:keys [current-scene] :as db} _]
     (-> db
-      (update-in [:scenes current-scene-idx :gridmap] clear-legal-moves)
+      (update-in [:scenes current-scene :gridmap] clear-legal-moves)
       (dissoc :moving-character))))
    
 
@@ -66,8 +66,7 @@
   [{:keys [full-name]} path gridmap]
   (if (> 2 (count path))
     gridmap
-    (let [{from-row-idx :row-idx from-col-idx :col-idx} (first path)
-          steps (subvec path 1 (count path))
+    (let [steps (subvec path 1 (count path))
           {to-row-idx :row-idx to-col-idx :col-idx} (last path)]
       (->
         gridmap
@@ -85,13 +84,13 @@
 
 (rf/reg-event-fx
   :preview-move-intention
-  (fn [{{:keys [current-scene-idx moving-character] :as db} :db} [_ end-tile]]
-    {:db (let [gridmap    (get-in db [:scenes current-scene-idx :gridmap])
+  (fn [{{:keys [current-scene moving-character] :as db} :db} [_ end-tile]]
+    {:db (let [gridmap    (get-in db [:scenes current-scene :gridmap])
                start-tile (get-characters-current-tile gridmap
                                                        moving-character)
                path       (get-path gridmap start-tile end-tile)]
            (-> db
-               (update-in [:scenes current-scene-idx :gridmap]
+               (update-in [:scenes current-scene :gridmap]
                           (comp (partial make-move-intention
                                          moving-character
                                          path) 
@@ -102,14 +101,14 @@
   :declare-move-intention
   (undoable "Declare move intention")
   (fn [cofx [_ end-tile]]
-    {:db (let [{:keys [current-scene-idx moving-character] :as db} (:db cofx)
-               gridmap    (get-in db [:scenes current-scene-idx :gridmap])
+    {:db (let [{:keys [current-scene moving-character] :as db} (:db cofx)
+               gridmap    (get-in db [:scenes current-scene :gridmap])
                start-tile (get-characters-current-tile gridmap
                                                        moving-character)
                path       (get-path gridmap start-tile end-tile)]
            (->
              db
-             (update-in [:scenes current-scene-idx :gridmap]
+             (update-in [:scenes current-scene :gridmap]
                         (partial declare-move-intention moving-character path))
              (assoc-in [:characters
                         (:full-name moving-character)
@@ -148,9 +147,9 @@
 
 (rf/reg-event-db
   :execute-intended-movements
-  (fn [{:keys [current-scene-idx] :as db}]
+  (fn [{:keys [current-scene] :as db}]
     (-> db
-      (update-in [:scenes current-scene-idx :gridmap] execute-movements))))
+      (update-in [:scenes current-scene :gridmap] execute-movements))))
 
 (rf/reg-sub
   :moving-character

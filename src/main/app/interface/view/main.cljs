@@ -3,6 +3,7 @@
             [reagent.core :as r]
             ; [ring.middleware.anti-forgery]
             [app.interface.view.scenes.start :refer [start-scene]]
+            [app.interface.view.overworld :refer [overworld]]
             [app.interface.view.tactical-scenario :refer [tactical-scenario]]
             [cljs.pprint]))
 
@@ -45,18 +46,14 @@
    [:div {:style {:display "flex"}}
     [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:app/setup])}
      "Reset App"]
-    [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:advance-scene])}
-     "Next Scene"]
     [:button.btn.btn-outline-primary {:on-click #(rf/dispatch [:pass-turn])}
      "End turn (enter)"]
     [undo-button]]
    [:br]
-   ; TODO remove this from here
-   [start-scene {}]
-   [:br]
-   (let [current-scene @(rf/subscribe [:current-scene])]
+   (let [[scene-name scene] @(rf/subscribe [:current-scene])]
      (cond
-       (= :start (:title current-scene)) [start-scene current-scene]
-       (contains? current-scene :gridmap) [tactical-scenario current-scene]
+       (= :start scene-name) [start-scene]
+       (= :overworld scene-name) [overworld]
+       (contains? scene :gridmap) [tactical-scenario scene]
        :else [:div "default"]))
    [:div @(rf/subscribe [:message])]])

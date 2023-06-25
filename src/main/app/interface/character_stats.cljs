@@ -25,3 +25,9 @@
 (defn get-tiles-left-to-move
   [{:keys [tiles-already-moved] {:keys [air]} :affinities}]
   (- air tiles-already-moved))
+
+(rf/reg-event-db
+  :toggle-select-for-chapter
+  (fn [db [_ full-name]]
+    (update-in db [:characters full-name :selected-for-chapter?]
+               not)))

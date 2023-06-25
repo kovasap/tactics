@@ -121,14 +121,3 @@
         (characters-by-full-name intention-character-full-name)]
     (and (not dead)
          controlled-by-player?)))
-
-(rf/reg-sub
-  :current-gridmap
-  (fn [db _]
-    (:gridmap @(rf/subscribe [:current-scene]))))
-
-(rf/reg-sub
-  :characters-current-tile
-  (fn [_ [_ full-name]]
-   (get-characters-current-tile @(rf/subscribe [:current-gridmap])
-                                {:full-name full-name})))

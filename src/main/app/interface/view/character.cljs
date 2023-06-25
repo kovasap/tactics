@@ -106,22 +106,61 @@
   [character]
   (common-character-view character true))
 
+
+(defn element-view
+  [{:keys [light dark air water earth fire]}]
+  ; https://stackoverflow.com/a/43958912
+  [:div {:style {:display "grid"
+                 :grid-gap "10px"
+                 :justify-items "center"
+                 :text-align "center"
+                 :grid-template-columns "repeat(2, 200px)"}}
+    [:div {:style {:grid-row "1"
+                   :grid-column "span 2"}}
+     [:b "Light " light] [:p "all-seeing, idealistic, non-interventive"]]
+    [:div [:b "Air " air] [:p "impulsive, fast, carefree"]]
+    [:div [:b "Water " water] [:p "meditative, redirecting"]]
+    [:div [:b "Fire " fire] [:p "impulsive, powerful"]]
+    [:div [:b "Earth " earth] [:p "meditative, disrupting"]]
+    [:div {:style {:grid-row "4"
+                   :grid-column "span 2"}}
+     [:b "Dark " dark] [:p "short-sighted, pragmatic, action-oriented"]]])
+
 ; TODO show table like
 ;  air    |  move
 ;         | dodge
 ; earth   | block
 ;         |  ...
 ; etc.
-; Turn health bar/ratio red if the character can be one shot by an enemy on the
+; Turn health bar/ratio red if the character can be one shot by an enemy on
+; the
 ; map.
 (defn character-info-view
-  [{:keys [class-keyword affinities weapon-levels] :as character}]
-  [:div
+  [{:keys [class-keyword
+           affinities
+           weapon-levels
+           image
+           selected-for-chapter?
+           full-name]
+    :as   character}]
+  [:div {:style         {:display          "grid"
+                         :grid-gap         "0px"
+                         :justify-items    "center"
+                         :text-align       "center"
+                         :background-color (if selected-for-chapter?
+                                             "green"
+                                             "grey")
+                         :grid-template-columns "repeat(1, 300px)"}
+         :on-mouse-over #(rf/dispatch [:play-animation character :attack])
+         :on-mouse-out  #()
+         :on-click      #(rf/dispatch [:toggle-select-for-chapter full-name])}
    [character-name character]
+   [:img {:src image}]
    [:p (name class-keyword)]
-   [:p (get-health character) " / " (get-max-health character)]
+   [:p (get-health character) " / " (get-max-health character) " health"]
    [:p (str weapon-levels)]
-   [:table
-     (into [:tbody]
-           (for [[element affinity] affinities]
-             [:tr [:td (name element)] [:td (str affinity)]]))]])
+   [element-view affinities]
+   #_[:table
+      (into [:tbody]
+            (for [[element affinity] affinities]
+              [:tr [:td (name element)] [:td (str affinity)]]))]])
