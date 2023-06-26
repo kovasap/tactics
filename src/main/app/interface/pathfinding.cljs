@@ -3,11 +3,13 @@
             [app.interface.gridmap
              :refer
              [get-tiles
-              has-targetable-player-character?
+              has-viewable-player-character?
               get-characters-current-tile
               get-adjacent-tiles
               get-characters-current-intention-tile]]
-            [app.interface.character-stats :refer [get-tiles-left-to-move]]
+            [app.interface.character-stats
+             :refer
+             [get-steps-left-to-move get-insight]]
             [app.interface.attacking :refer [tile-in-attack-range?]]))
 
 (defn get-steps-to-move-to
@@ -57,23 +59,27 @@
   turn end."
   [path character]
   (truncate-occupied-path-steps
-    (truncate-path path (get-tiles-left-to-move character))))
+    (truncate-path path (get-steps-left-to-move character))))
+
+(defn get-visible-player-character-tiles
+  [gridmap viewing-character characters-by-full-name]
+  (get-tiles gridmap
+             #(has-viewable-player-character? %
+                                              viewing-character
+                                              characters-by-full-name)))
 
 (defn get-path-to-nearest-player-character
- [gridmap character characters-by-full-name]
- (first
-  (sort-by
-   count
-   (for [player-character-tile (get-tiles gridmap
-                                          (fn [{:keys [character-full-name]}]
-                                           (:controlled-by-player?
-                                            (characters-by-full-name
-                                             character-full-name))))]
-    (get-path gridmap
-              (or (get-characters-current-intention-tile gridmap
-                                                         character)
-                  (get-characters-current-tile gridmap character))
-              player-character-tile)))))
+  [gridmap character characters-by-full-name]
+  (first
+    (sort-by
+      count
+      (for [player-character-tile (get-visible-player-character-tiles
+                                    gridmap
+                                    character
+                                    characters-by-full-name)]
+        (get-path gridmap
+                  (get-characters-current-tile gridmap character)
+                  player-character-tile)))))
 
 (defn get-usable-path-to-nearest-player-character
   [gridmap character characters-by-full-name]
@@ -93,8 +99,9 @@
     (if (empty?
           (get-tiles gridmap
                      #(and (tile-in-attack-range? character final-location %)
-                           (has-targetable-player-character?
+                           (has-viewable-player-character?
                              %
+                             character
                              characters-by-full-name))))
       []
       candidate-path)))

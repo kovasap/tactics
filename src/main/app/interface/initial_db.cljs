@@ -18,12 +18,19 @@
 
 (def characters
   [(make-character
-     {:full-name "Main Character"
-      :letter-code "M"
+     {:full-name "Hare"
+      :letter-code "H"
       :class-keyword :skirmisher
       :controlled-by-player? true
       :equipped-weapon :sword-and-shield
       :affinities {:fire 1 :air 8 :earth 2 :water 3 :light 0 :dark 0}})
+   (make-character
+     {:full-name "Tortoise"
+      :letter-code "T"
+      :class-keyword :skirmisher
+      :controlled-by-player? true
+      :equipped-weapon :sword-and-shield
+      :affinities {:fire 1 :air 1 :earth 8 :water 3 :light 0 :dark 0}})
    (make-character
      {:full-name           "Opponent One"
       :letter-code         "1"
@@ -67,7 +74,7 @@
                               :light "I can see the trail"}}]
      :gridmap
      (parse-gridmap-str-with-characters
-       "FM  M   M   R   F   P   P   W  
+       "FH  M   M   R   F   PT  P   W  
         M   W   M   R   F   P   P   W
         M   M   F   R   F   P   P   W
         M   M   M   R   F   P   P   W

@@ -4,7 +4,7 @@
     [day8.re-frame.undo :as undo :refer [undoable]]
     [app.interface.gridmap :refer [update-tiles get-characters-current-tile]]
     [app.interface.pathfinding :refer [get-number-of-path-steps get-path]]
-    [app.interface.character-stats :refer [get-tiles-left-to-move]]))
+    [app.interface.character-stats :refer [get-steps-left-to-move]]))
 
 (defn begin-move
  [character gridmap]
@@ -12,7 +12,7 @@
   (update-tiles
    gridmap
    (fn [tile]
-    (> (inc (get-tiles-left-to-move character))
+    (> (inc (get-steps-left-to-move character))
        ; alternative: as the bird flies distance
        ; (distance from-tile tile)
        (get-number-of-path-steps (get-path gridmap from-tile tile))))

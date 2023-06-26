@@ -1,10 +1,21 @@
 (ns app.interface.view.character
-  (:require [reagent.core :as r]
-            [re-frame.core :as rf]
-            [app.interface.character-stats :refer [get-health get-max-health
-                                                   experience-to-next-level]]
-            [app.interface.view.attacks :refer [defender-hover-attack-view]]
-            [app.interface.constant-game-data :refer [character-classes weapons]]))
+  (:require
+    [reagent.core :as r]
+    [re-frame.core :as rf]
+    [app.interface.character-stats
+     :refer
+     [get-health
+      get-max-health
+      calc-speed
+      calc-move-range
+      calc-max-health
+      calc-power
+      calc-defense
+      calc-sneak
+      calc-insight
+      experience-to-next-level]]
+    [app.interface.view.attacks :refer [defender-hover-attack-view]]
+    [app.interface.constant-game-data :refer [character-classes weapons]]))
 
 (defn character-name
   [{:keys [controlled-by-player? full-name]}]
@@ -108,23 +119,53 @@
 
 
 (defn element-view
-  [{:keys [light dark air water earth fire]}]
+  [{:keys [light dark air water earth fire] :as affinities}]
   ; https://stackoverflow.com/a/43958912
-  [:div {:style {:display "grid"
-                 :grid-gap "10px"
+  [:div {:style {:display       "grid"
+                 :grid-gap      "10px"
                  :justify-items "center"
-                 :text-align "center"
+                 :text-align    "center"
                  :grid-template-columns "repeat(2, 200px)"}}
-    [:div {:style {:grid-row "1"
-                   :grid-column "span 2"}}
-     [:b "Light " light] [:p "all-seeing, idealistic, non-interventive"]]
-    [:div [:b "Air " air] [:p "impulsive, fast, carefree"]]
-    [:div [:b "Water " water] [:p "meditative, redirecting"]]
-    [:div [:b "Fire " fire] [:p "impulsive, powerful"]]
-    [:div [:b "Earth " earth] [:p "meditative, disrupting"]]
-    [:div {:style {:grid-row "4"
-                   :grid-column "span 2"}}
-     [:b "Dark " dark] [:p "short-sighted, pragmatic, action-oriented"]]])
+   [:div {:style {:grid-row "1" :grid-column "span 2"}}
+    [:b "Light " light] " / " (calc-insight affinities) " Insight"
+    [:p.affinity-desc "All-seeing, idealistic, non-interventive."]
+    [:p.affinity-desc
+     "Insight determines whether other characters will be able to see this
+     characters intention or not before they make their move. If the other
+     character has a lower insight, they will move to where this character is
+     before their move if they are trying to attack this character."]]
+   [:div
+    [:b "Air " air] " / " (calc-speed affinities) " Speed / "
+    (calc-move-range affinities) " Base Move Range"
+    [:p.affinity-desc "Impulsive, fast, carefree."]
+    [:p.affinity-desc
+     "Speed determines who will attack first in a fight without advantage."]
+    [:p.affinity-desc
+     "Base Move Range is the distance in steps a character can move in a turn.
+     Note that different tiles take a different number of steps to move do
+     based on their affinities and the moving character's affinities
+     (TODO implement this by changing pathfinding.get-steps-to-move-to)!"]]
+   [:div
+    [:b "Water " water] " / " (calc-defense affinities) " Defense"
+    [:p.affinity-desc "Meditative, redirecting."]
+    [:p.affinity-desc
+     "Defense is directly subtracted from all damage received."]]
+   [:div
+    [:b "Fire " fire] " / " (calc-power affinities) " Power"
+    [:p.affinity-desc "Impulsive, powerful."]
+    [:p.affinity-desc "Power is directly added to all damage dealt."]]
+   [:div
+    [:b "Earth " earth] " / " (calc-max-health affinities) " Max Health"
+    [:p.affinity-desc "Meditative, disrupting."]
+    [:p.affinity-desc
+     "Max health is the total amount of health this character can have."]]
+   [:div {:style {:grid-row "4" :grid-column "span 2"}}
+    [:b "Dark " dark] " / " (calc-sneak affinities) " Sneak"
+    [:p.affinity-desc "Short-sighted, pragmatic, action-oriented."]
+    [:p.affinity-desc
+     "Characters with higher
+      sneak will not be targeted for attacks if there is a character with
+      lower sneak to target instead."]]])
 
 ; TODO show table like
 ;  air    |  move
@@ -150,7 +191,7 @@
                          :background-color (if selected-for-chapter?
                                              "green"
                                              "grey")
-                         :grid-template-columns "repeat(1, 300px)"}
+                         :grid-template-columns "repeat(1, 400px)"}
          :on-mouse-over #(rf/dispatch [:play-animation character :attack])
          :on-mouse-out  #()
          :on-click      #(rf/dispatch [:toggle-select-for-chapter full-name])}

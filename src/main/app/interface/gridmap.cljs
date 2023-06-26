@@ -1,10 +1,12 @@
 (ns app.interface.gridmap
-  (:require [re-frame.core :as rf]
-            [reagent.core :as r]
-            [perlin2d.core :as p]
-            [app.interface.lands :refer [lands]]
-            [app.interface.utils :refer [get-only]]
-            [clojure.string :as st]))
+  (:require
+    [re-frame.core :as rf]
+    [reagent.core :as r]
+    [perlin2d.core :as p]
+    [app.interface.lands :refer [lands]]
+    [app.interface.utils :refer [get-only]]
+    [app.interface.character-stats :refer [can-view-character-intention?]]
+    [clojure.string :as st]))
 
 ; TODO use one perlin noise for humidity and one for elevation to generate more
 ; land types in interesting ways
@@ -115,9 +117,19 @@
       (get-in gridmap [(+ row-idx row-idx-shift) (+ col-idx col-idx-shift)]))))
 
 
-(defn has-targetable-player-character?
-  [{:keys [intention-character-full-name]} characters-by-full-name]
-  (let [{:keys [dead controlled-by-player?]}
-        (characters-by-full-name intention-character-full-name)]
-    (and (not dead)
-         controlled-by-player?)))
+(defn has-viewable-player-character?
+  [{:keys [character-full-name intention-character-full-name]}
+   viewing-character
+   characters-by-full-name]
+  (let [character (characters-by-full-name character-full-name)
+        intention-character (characters-by-full-name
+                              intention-character-full-name)]
+    (or
+      ; If we can't see the character intention
+      (and (not (can-view-character-intention? viewing-character character))
+           (not (:dead character))
+           (:controlled-by-player? character))
+      ; If we can see the intention-character intention
+      (and (can-view-character-intention? viewing-character intention-character)
+           (not (:dead character))
+           (:controlled-by-player? character)))))
