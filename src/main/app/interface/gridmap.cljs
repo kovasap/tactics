@@ -131,5 +131,5 @@
            (:controlled-by-player? character))
       ; If we can see the intention-character intention
       (and (can-view-character-intention? viewing-character intention-character)
-           (not (:dead character))
-           (:controlled-by-player? character)))))
+           (not (:dead intention-character))
+           (:controlled-by-player? intention-character)))))

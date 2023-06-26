@@ -53,7 +53,7 @@
                   (= intention-character-full-name full-name))
                 (fn [tile] (dissoc tile :intention-character-full-name))))
   
-
+; TODO fix this
 (rf/reg-event-db
   :cancel-move
   (fn [{:keys [current-scene] :as db} _]
@@ -134,7 +134,7 @@
 (defn execute-movements
   [gridmap]
   (-> gridmap
-      ; remove old positons for moved characters
+      ; remove old positions for moved characters
       (update-tiles character-moved-from-tile?
                     #(dissoc % :character-full-name))
       ; TODO if hitting a waypoints triggers any effect, do it here

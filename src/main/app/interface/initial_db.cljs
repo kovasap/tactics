@@ -23,7 +23,7 @@
       :class-keyword :skirmisher
       :controlled-by-player? true
       :equipped-weapon :sword-and-shield
-      :affinities {:fire 1 :air 8 :earth 2 :water 3 :light 0 :dark 0}})
+      :affinities {:fire 1 :air 8 :earth 2 :water 3 :light 5 :dark 0}})
    (make-character
      {:full-name "Tortoise"
       :letter-code "T"
@@ -38,21 +38,23 @@
       :class-keyword       :assassin
       :ai-behavior         :attack-in-range
       :equipped-weapon     :cloak-and-dagger
-      :affinities          {:fire 1 :air 3 :earth 2 :water 3 :light 0 :dark 2}})
+      :affinities          {:fire 1 :air 3 :earth 2 :water 3 :light 3 :dark 2}})
    (make-character
      {:full-name           "Opponent Two"
       :letter-code         "2"
       :controlled-by-player? false
       :class-keyword       :assassin
       :ai-behavior         :attack-in-range
-      :equipped-weapon     :cloak-and-dagger})
+      :equipped-weapon     :cloak-and-dagger
+      :affinities          {:fire 1 :air 3 :earth 2 :water 3 :light 3 :dark 2}})
    (make-character
      {:full-name           "Opponent Three"
       :letter-code         "3"
       :controlled-by-player? false
       :class-keyword       :assassin
       :ai-behavior         :attack-in-range
-      :equipped-weapon     :cloak-and-dagger})])
+      :equipped-weapon     :cloak-and-dagger
+      :affinities          {:fire 1 :air 3 :earth 2 :water 3 :light 3 :dark 2}})])
 
 (defn parse-gridmap-str-with-characters
   [gridmap-str]
@@ -74,7 +76,7 @@
                               :light "I can see the trail"}}]
      :gridmap
      (parse-gridmap-str-with-characters
-       "FH  M   M   R   F   PT  P   W  
+       "F   M   M   R   FH  PT  P   W  
         M   W   M   R   F   P   P   W
         M   M   F   R   F   P   P   W
         M   M   M   R   F   P   P   W

@@ -24,6 +24,12 @@ sudo ufw allow 5000
 sudo ufw allow 9630
 ```
 
+## Development
+
+Use `clj -M:frontend` to start the auto cljs compiler (shadow-cljs).
+
+https://github.com/Olical/conjure/wiki/Quick-start:-ClojureScript-(shadow-cljs)
+
 ## Deployment
 
 ### As a static web page (frontend only)
