@@ -12,6 +12,7 @@
       calc-power
       calc-defense
       calc-sneak
+      calc-ambition
       calc-insight
       experience-to-next-level]]
     [app.interface.view.attacks :refer [defender-hover-attack-view]]
@@ -160,12 +161,16 @@
     [:p.affinity-desc
      "Max health is the total amount of health this character can have."]]
    [:div {:style {:grid-row "4" :grid-column "span 2"}}
-    [:b "Dark " dark] " / " (calc-sneak affinities) " Sneak"
+    [:b "Dark " dark] " / " (calc-sneak affinities) " Sneak / "
+    (calc-ambition affinities) " Ambition"
     [:p.affinity-desc "Short-sighted, pragmatic, action-oriented."]
     [:p.affinity-desc
      "Characters with higher
       sneak will not be targeted for attacks if there is a character with
-      lower sneak to target instead."]]])
+      lower sneak to target instead (TODO implement or remove)."]
+    [:p.affinity-desc
+     "Ambition is the number of attacks a character can make in a turn
+     (including counterattacks)."]]])
 
 ; TODO show table like
 ;  air    |  move
