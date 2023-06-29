@@ -15,7 +15,8 @@
       tile-in-attack-range?
       get-post-attacks-character
       get-duration-of-attacks-ms
-      filter-dead-attacks]]
+      filter-dead-attacks
+      filter-attacks-without-ambition]]
     [app.interface.gridmap
      :refer
      [get-characters-current-tile
@@ -53,31 +54,29 @@
      (partial update-move-intention character characters-by-full-name)))
    gridmap))
 
-(defn get-attack-target-full-name
+(defn get-attack-target-full-names
   [gridmap attacker]
-  ; TODO maybe make more intelligent target selection?
-  (first
-    (for [{:keys [intention-character-full-name]}
-          (get-tiles
-            gridmap
-            (partial tile-in-attack-range?
-                     attacker
-                     (or (get-characters-current-intention-tile gridmap
-                                                                attacker)
-                         (get-characters-current-tile gridmap attacker))))
-          :when (not (nil? intention-character-full-name))]
-      intention-character-full-name)))
+  (for [{:keys [intention-character-full-name]}
+        (get-tiles
+          gridmap
+          (partial tile-in-attack-range?
+                   attacker
+                   (or (get-characters-current-intention-tile gridmap
+                                                              attacker)
+                       (get-characters-current-tile gridmap attacker))))
+        :when (not (nil? intention-character-full-name))]
+    intention-character-full-name))
 
 (defn get-attack-intentions
   [gridmap characters-by-full-name]
   (vec
-    (reduce concat
-      (for [attacker (sort-by get-speed (vals characters-by-full-name))
-            :let     [target-full-name (get-attack-target-full-name gridmap
-                                                                    attacker)]
-            :when    (and (not (nil? target-full-name))
-                          (not (:controlled-by-player? attacker)))]
-        (get-attacks attacker (characters-by-full-name target-full-name))))))
+    (sort-by #(get-speed (:defender %))
+      (reduce concat
+        (for [attacker (vals characters-by-full-name)
+              target-full-name (get-attack-target-full-names gridmap attacker)
+              :when    (and (not (nil? target-full-name))
+                            (not (:controlled-by-player? attacker)))]
+          (get-attacks attacker (characters-by-full-name target-full-name)))))))
 
 
 (rf/reg-event-db
@@ -90,13 +89,11 @@
   :update-opponent-attack-intentions
   (fn [{:keys [current-scene characters] :as db}]
     (assoc db
-      :intended-attacks (filter-dead-attacks
-                          (vals characters)
-                          (get-attack-intentions (get-in db
-                                                         [:scenes
-                                                          current-scene
-                                                          :gridmap])
-                                                 characters)))))
+      :intended-attacks
+      (-> (get-attack-intentions (get-in db [:scenes current-scene :gridmap])
+                                 characters)
+          ((partial filter-dead-attacks (vals characters)))
+          ((partial filter-attacks-without-ambition (vals characters)))))))
 
 (rf/reg-event-fx
   :update-opponent-intentions

@@ -140,7 +140,10 @@
     (calc-move-range affinities) " Base Move Range"
     [:p.affinity-desc "Impulsive, fast, carefree."]
     [:p.affinity-desc
-     "Speed determines who will attack first in a fight without advantage."]
+     "Speed determines who will attack first in a fight without advantage.
+     It also determines the order in which attacks will be made; faster
+     characters will be attacked last - or not attacked at all if the attacker
+     does have sufficient ambition!"]
     [:p.affinity-desc
      "Base Move Range is the distance in steps a character can move in a turn.
      Note that different tiles take a different number of steps to move do

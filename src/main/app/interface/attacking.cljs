@@ -6,7 +6,7 @@
     [app.interface.constant-game-data :refer [weapons weapon-advantages]]
     [app.interface.character-stats
      :refer
-     [get-max-health get-speed experience-to-next-level]]
+     [get-max-health get-speed experience-to-next-level calc-ambition]]
     [app.interface.animations :refer [get-animation-duration]]
     [app.interface.gridmap
      :refer
@@ -222,14 +222,40 @@
      (cond
        (nil? cur-attack) attacks
        cur-attack-involves-dead-characters
-         (filter-dead-attacks characters
-                              (remove-at-idx cur-attack-idx attacks)
-                              cur-attack-idx)
+       (filter-dead-attacks characters
+                            (remove-at-idx cur-attack-idx attacks)
+                            cur-attack-idx)
        :else (filter-dead-attacks (for [character characters]
                                     (get-post-attacks-character character
                                                                 [cur-attack]))
                                   attacks
                                   (inc cur-attack-idx))))))
+
+(defn- filter-attacks-without-ambition-helper
+  [remaining-ambition filtered-attacks-vec unfiltered-attacks-vec]
+  (if (empty? unfiltered-attacks-vec)
+    ; Base case - done filtering!
+    filtered-attacks-vec
+    ; Need to filter
+    (let [{{:keys [full-name]} :attacker :as cur-attack}
+          (first unfiltered-attacks-vec)]
+      (filter-attacks-without-ambition-helper
+        (update remaining-ambition full-name dec)
+        (if (> (remaining-ambition full-name) 0)
+          (conj filtered-attacks-vec cur-attack)
+          ; Out of ambition
+          filtered-attacks-vec)
+        (rest unfiltered-attacks-vec)))))
+
+(defn filter-attacks-without-ambition
+  [characters attacks]
+  (assert (vector? attacks))
+  (filter-attacks-without-ambition-helper
+    (into {}
+          (for [{:keys [full-name affinities]} characters]
+            [full-name (calc-ambition affinities)]))
+    []
+    attacks))
 
 (rf/reg-event-fx
   :execute-intended-attacks

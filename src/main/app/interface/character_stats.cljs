@@ -44,7 +44,7 @@
 
 (defn calc-ambition
  [affinities]
- (* 1 (:dark affinities)))
+ (+ 1 (/ (:dark affinities) 4)))
 
 ; TODO make every class give a bonus to this value
 (defn get-max-health
