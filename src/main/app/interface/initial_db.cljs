@@ -1,5 +1,5 @@
 (ns app.interface.initial-db
-  (:require [app.interface.gridmap :refer [parse-gridmap-str]]
+  (:require [app.interface.gridmap :refer [parse-gridmap-str get-tiles update-tiles]]
             [app.interface.utils :refer [associate-by]]
             [app.interface.constant-game-data :refer [character-classes]]))
 
@@ -16,6 +16,16 @@
     :experience 0
     :tiles-already-moved 0))
 
+(def enemy-templates
+  [(make-character
+     {:full-name "Assassin"
+      :letter-code "a"
+      :controlled-by-player? false
+      :class-keyword :assassin
+      :ai-behavior :attack-in-range
+      :equipped-weapon :cloak-and-dagger
+      :affinities {:fire 1 :air 3 :earth 2 :water 3 :light 3 :dark 2}})])
+
 (def characters
   [(make-character
      {:full-name "Hare"
@@ -30,64 +40,50 @@
       :class-keyword :skirmisher
       :controlled-by-player? true
       :equipped-weapon :sword-and-shield
-      :affinities {:fire 1 :air 1 :earth 8 :water 3 :light 0 :dark 0}})
-   (make-character
-     {:full-name           "Opponent One"
-      :letter-code         "1"
-      :controlled-by-player? false
-      :class-keyword       :assassin
-      :ai-behavior         :attack-in-range
-      :equipped-weapon     :cloak-and-dagger
-      :affinities          {:fire 1 :air 3 :earth 2 :water 3 :light 3 :dark 2}})
-   (make-character
-     {:full-name           "Opponent Two"
-      :letter-code         "2"
-      :controlled-by-player? false
-      :class-keyword       :assassin
-      :ai-behavior         :attack-in-range
-      :equipped-weapon     :cloak-and-dagger
-      :affinities          {:fire 1 :air 3 :earth 2 :water 3 :light 3 :dark 2}})
-   (make-character
-     {:full-name           "Opponent Three"
-      :letter-code         "3"
-      :controlled-by-player? false
-      :class-keyword       :assassin
-      :ai-behavior         :attack-in-range
-      :equipped-weapon     :cloak-and-dagger
-      :affinities          {:fire 1 :air 3 :earth 2 :water 3 :light 3 :dark 2}})])
+      :affinities {:fire 1 :air 1 :earth 8 :water 3 :light 0 :dark 0}})])
 
 (defn parse-gridmap-str-with-characters
-  [gridmap-str]
-  (parse-gridmap-str gridmap-str (associate-by :letter-code characters)))
+  [gridmap-str scenario-name]
+  (let [gridmap (parse-gridmap-str gridmap-str
+                                   (associate-by :letter-code characters)
+                                   (associate-by :letter-code
+                                                 enemy-templates)
+                                   scenario-name)]
+    [(update-tiles gridmap #(dissoc % :generated-character))
+     (map :generated-character (get-tiles gridmap :generated-character))]))
+
 
 (def initial-db
-  {:scenes
-   {:overworld {}
-    :start {}
-    :scenario-1
-    {:intro-dialogue [{:character-full-name "Main Character"
-                       :text "Here we can start our journey"}
-                      {:character-full-name "Main Character"
-                       :text {:fire  "Let's move!"
-                              :dark  "Let's get going!"
-                              :air   "Catch me if you can!"
-                              :earth "Give me that pack."
-                              :water "..."
-                              :light "I can see the trail"}}]
-     :gridmap
+  (let
+    [[scenario-1-map scenario-1-characters]
      (parse-gridmap-str-with-characters
        "F   M   M   R   FH  PT  P   W  
         M   W   M   R   F   P   P   W
         M   M   F   R   F   P   P   W
         M   M   M   R   F   P   P   W
         M   C   C   R   C   C   C   W
-        F   M   M2  R   F1  F   F   W
+        F   M   Ma  R   Fa  F   F   W
         F   M   M   R   W   F   F   W
         W   M   M   W   W   W   F   W
         S   M   S   S   W   F   F   W
-        S   S   S   S3  S   F   F   W
-        S   S   S   S   S   F   F   W")
-     :location-on-map ["500" "400"]}}
-   :characters (associate-by :full-name characters)
-   :dialogue-queue '()
-   :current-scene :overworld})
+        S   S   S   Sa  S   F   F   W
+        S   S   S   S   S   F   F   W"
+       "scenario-1")]
+    {:scenes         {:overworld  {}
+                      :start      {}
+                      :scenario-1 {:intro-dialogue
+                                   [{:character-full-name "Main Character"
+                                     :text "Here we can start our journey"}
+                                    {:character-full-name "Main Character"
+                                     :text {:fire  "Let's move!"
+                                            :dark  "Let's get going!"
+                                            :air   "Catch me if you can!"
+                                            :earth "Give me that pack."
+                                            :water "..."
+                                            :light "I can see the trail"}}]
+                                   :gridmap scenario-1-map
+                                   :location-on-map ["500" "400"]}}
+     :characters     (associate-by :full-name
+                                   (concat characters scenario-1-characters))
+     :dialogue-queue '()
+     :current-scene  :overworld}))

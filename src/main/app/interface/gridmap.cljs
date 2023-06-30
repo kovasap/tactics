@@ -42,27 +42,43 @@
          args))
 
 (defn tile-from-str
-  [row-idx col-idx [tile-letter bonus-letter] characters-by-letter-code]
-  (let [character-full-name (:full-name (characters-by-letter-code bonus-letter))]
-    (base-tile
-      {:row-idx row-idx
-       :col-idx col-idx
-       :character-full-name character-full-name
-       :intention-character-full-name character-full-name 
-       :land    (get-only lands :letter tile-letter)})))
+  [row-idx
+   col-idx
+   [tile-letter bonus-letter]
+   characters-by-letter-code
+   enemy-templates-by-letter-code
+   scenario-name]
+  (let [enemy-template (enemy-templates-by-letter-code bonus-letter)
+        enemy (update enemy-template
+                      :full-name #(str % "_" scenario-name "-" row-idx "-" col-idx))
+        character-full-name (:full-name (if enemy-template
+                                          enemy
+                                          (characters-by-letter-code
+                                            bonus-letter)))]
+    (base-tile {:row-idx row-idx
+                :col-idx col-idx
+                :character-full-name character-full-name
+                :intention-character-full-name character-full-name
+                :generated-character (if enemy-template enemy nil)
+                :land    (get-only lands :letter tile-letter)})))
 
 (defn parse-gridmap-str
-  "Returns 2d array of tile maps."
-  [gridmap-str characters-by-letter-code]
+  "Returns 2d array of tile maps.  Tiles may contain a :generated-character key
+  that should be added to the global list of characters."
+  [gridmap-str characters-by-letter-code enemy-templates-by-letter-code scenario-name]
   (into []
-        (map-indexed
-          (fn [row-idx line]
-            (into []
-                  (map-indexed (fn [col-idx tile-str]
-                                 (tile-from-str row-idx col-idx tile-str
-                                                characters-by-letter-code))
-                               (st/split (st/trim line) #" +"))))
-          (st/split-lines gridmap-str))))
+        (map-indexed (fn [row-idx line]
+                       (into []
+                             (map-indexed (fn [col-idx tile-str]
+                                            (tile-from-str
+                                              row-idx
+                                              col-idx
+                                              tile-str
+                                              characters-by-letter-code
+                                              enemy-templates-by-letter-code
+                                              scenario-name))
+                                          (st/split (st/trim line) #" +"))))
+                     (st/split-lines gridmap-str))))
 
 (defn generate-perlin-board
   "Returns 2d array of tile maps."
