@@ -9,7 +9,7 @@
             [app.interface.utils :refer [get-only]]))
 
 
-(def tile-size "120px")
+(def tile-size "130px")
 
 
 (defn tile-view

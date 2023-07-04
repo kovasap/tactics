@@ -127,7 +127,6 @@
           (get-damage-reduction defender))
        0))
 
-
 (declare get-experience-from-attack)
 
 (defn get-weapon-level-from-attack

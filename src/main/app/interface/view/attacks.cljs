@@ -19,20 +19,20 @@
     [:div "Damage reduction " (get-damage-reduction defender)]]
    [:div "Final damage: " (calc-damage attack)]])
 
-(defn defender-hover-attack-view
-  [{:keys [advantage] {:keys [equipped-weapon]} :defender :as attack}]
-  [:div {:style {:color (case advantage
-                          :attacker "red"
-                          :defender "green"
-                          :else     "black")}}
-   ; TODO make this look nicer
-   [:img {:src (:image (equipped-weapon weapons))}]
-   (str (case advantage
-          :attacker "↓"
-          :defender "↑"
-          :else     "")
-        " "
-        (calc-damage attack)
-        " dmg")])
+#_(defn defender-hover-attack-view
+   [{:keys [advantage] {:keys [equipped-weapon]} :defender :as attack}]
+   [:div {:style {:color (case advantage
+                           :attacker "red"
+                           :defender "green"
+                           :else     "black")}}
+    ; TODO make this look nicer
+    [:img {:src (:image (equipped-weapon weapons))}]
+    (str (case advantage
+           :attacker "↓"
+           :defender "↑"
+           :else     "")
+         " "
+         (calc-damage attack)
+         " dmg")])
   
   

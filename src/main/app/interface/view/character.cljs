@@ -15,7 +15,7 @@
       calc-ambition
       calc-insight
       experience-to-next-level]]
-    [app.interface.view.attacks :refer [defender-hover-attack-view]]
+    ; [app.interface.view.attacks :refer [defender-hover-attack-view]]
     [app.interface.constant-game-data :refer [character-classes weapons]]))
 
 (defn character-name
@@ -24,31 +24,40 @@
         full-name])
 
 (defn- common-character-view
-  [{:keys
-    [experience level image controlled-by-player? has-intention? dead full-name]
-    :as character}
+  [{:keys [experience
+           level
+           image
+           controlled-by-player?
+           has-intention?
+           dead
+           full-name
+           equipped-weapon]
+    :as   character}
    is-intention?]
-  (let [hovered-element @(rf/subscribe [:hovered-element])
-        is-hovered?     (= character hovered-element)
+  (let [hovered-element     @(rf/subscribe [:hovered-element])
+        is-hovered?         (= character hovered-element)
         next-turn-character @(rf/subscribe [:next-turn-character character])
-        attacks         @(rf/subscribe [:attacks-targeting-character
-                                        character])]
+        moving-character    @(rf/subscribe [:moving-character])
+        attacks             @(rf/subscribe [:attacks-targeting-character
+                                            character])]
     (if character
       [:div {:on-mouse-over #(rf/dispatch [:hover-element
                                            :character
                                            character])
              :on-mouse-out  #()
              :style         {:z-index 2}}
-       [:div.character {:style {:position   "absolute"
-                                :overflow   "visible"
-                                :text-align "left"
-                                :top        50
-                                :z-index    3
-                                :display    (if (and controlled-by-player?
-                                                     is-hovered?
-                                                     (not dead))
-                                              "block"
-                                              "none")}}
+       [:div.character
+        {:style {:position   "absolute"
+                 :overflow   "visible"
+                 :text-align "left"
+                 :top        50
+                 :z-index    50
+                 :display    (if (and controlled-by-player?
+                                      is-hovered?
+                                      (not moving-character)
+                                      (not dead))
+                               "block"
+                               "none")}}
         [:button.btn.btn-outline-primary
          {:on-click #(if @(rf/subscribe [:moving-character])
                        (rf/dispatch [:cancel-move])
@@ -61,53 +70,60 @@
                          (rf/dispatch [:cancel-attack])
                          (rf/dispatch [:begin-attack character]))}
            "Attack"]
-        [:button.btn.btn-outline-primary
-         {:on-click #()}
+        [:button.btn.btn-outline-primary {:on-click #()}
          "Re-equip"]
-        [:button.btn.btn-outline-primary
-         {:on-click #()}
+        [:button.btn.btn-outline-primary {:on-click #()}
          "Utility"]]
        [character-name character]
        [:br]
        [:img {:style {:opacity   (if is-intention? 0.2 1.0)
                       :transform (if dead "rotate(90deg)" nil)
+                      :z-index   20
                       :filter    (if (not (empty? attacks))
                                    "drop-shadow(0px 0px 20px red)"
                                    nil)}
               :src   image}]
-       (if (= has-intention? is-intention?)
-         (into [:div {:style {:position    "absolute"
-                              :z-index     8
-                              :left        "35%"
-                              :top         "-10%"
-                              :white-space "nowrap"}}]
-               (for [attack attacks]
-                 [defender-hover-attack-view attack]))
-         nil)
+       #_(if (= has-intention? is-intention?)
+           (into [:div {:style {:position    "absolute"
+                                :z-index     8
+                                :left        "35%"
+                                :top         "-10%"
+                                :white-space "nowrap"}}]
+                 (for [attack attacks]
+                   [defender-hover-attack-view attack]))
+           nil)
        ; Experience
        [:div {:style {:position    "absolute"
                       :z-index     10
-                      :left        "-20%"
+                      :left        "0%"
                       :top         "50%"
                       :white-space "nowrap"}}
-        [:div (str "Lv" level " " experience " / " experience-to-next-level)]
+        [:div "Exp"]
+        [:div (str experience " / " experience-to-next-level)]
         [:div "↓"]
         [:div
-         (str "Lv" (:level next-turn-character)
-              " "   (:experience next-turn-character)
-              " / " experience-to-next-level)]]
+         (str (:experience next-turn-character)
+              " / "
+              experience-to-next-level)]]
        ; Health
        [:div {:style {:position    "absolute"
                       :z-index     10
-                      :left        "80%"
+                      :left        "70%"
                       :top         "50%"
                       :white-space "nowrap"}}
+        [:div "HP"]
         [:div (str (get-health character) " / " (get-max-health character))]
         [:div "↓"]
         [:div {:style {:color (if (:dead next-turn-character) "red" "black")}}
          (str (get-health next-turn-character)
               " / "
-              (get-max-health next-turn-character))]]]
+              (get-max-health next-turn-character))]]
+       [:div {:style {:position    "absolute"
+                      :z-index     10
+                      :left        "15%"
+                      :top         "40%"
+                      :white-space "nowrap"}}
+        [:img {:src (:image (equipped-weapon weapons))}]]]
       nil)))
 
 (defn character-view

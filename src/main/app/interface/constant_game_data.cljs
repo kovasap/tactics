@@ -15,7 +15,7 @@
    :flail {:image "item-images/sling.png" :range 1 :damage 4}
    :cloak-and-dagger {:image "item-images/dagger.png" :range 1 :damage 2}
    :staff {:image "item-images/staff.png" :range 1 :damage 6}
-   :tome {:image "item-images/tome.png" :range 1 :damage 6}})
+   :tome {:image "item-images/book1.png" :range 1 :damage 6}})
 
 (def utility-items
   {:smoke-bomb {}
