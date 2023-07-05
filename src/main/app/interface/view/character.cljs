@@ -191,15 +191,18 @@
      "Ambition is the number of attacks a character can make in a turn
      (including counterattacks)."]]])
 
-; TODO show table like
-;  air    |  move
-;         | dodge
-; earth   | block
-;         |  ...
-; etc.
-; Turn health bar/ratio red if the character can be one shot by an enemy on
-; the
-; map.
+; TODO Turn health bar/ratio red if the character can be one shot by an enemy
+; on the map.
+
+(defn character-leveling-panel
+  [character]
+  [:div {:style         {:display          "grid"
+                         :grid-gap         "0px"
+                         :grid-template-columns "200px"}}
+   (into [:div]
+         (for [[kw {:keys [prequisite-affinities]}] character-classes]
+           [:div (str (name kw) " " prequisite-affinities)]))])
+
 (defn character-info-view
   [{:keys [class-keyword
            affinities
@@ -208,24 +211,35 @@
            selected-for-chapter?
            full-name]
     :as   character}]
-  [:div {:style         {:display          "grid"
-                         :grid-gap         "0px"
-                         :justify-items    "center"
-                         :text-align       "center"
-                         :background-color (if selected-for-chapter?
-                                             "green"
-                                             "grey")
-                         :grid-template-columns "repeat(1, 400px)"}
-         :on-mouse-over #(rf/dispatch [:play-animation character :attack])
-         :on-mouse-out  #()
-         :on-click      #(rf/dispatch [:toggle-select-for-chapter full-name])}
-   [character-name character]
-   [:img {:src image}]
-   [:p (name class-keyword)]
-   [:p (get-health character) " / " (get-max-health character) " health"]
-   [:p (str weapon-levels)]
-   [element-view affinities]
-   #_[:table
-      (into [:tbody]
-            (for [[element affinity] affinities]
-              [:tr [:td (name element)] [:td (str affinity)]]))]])
+  (let [leveling-view? (= full-name
+                          @(rf/subscribe [:currently-leveling-full-name]))]
+    [:div {:style         {:display          "grid"
+                           :grid-gap         "0px"
+                           :justify-items    "center"
+                           :text-align       "center"
+                           :transition "all .5s linear"
+                           :background-color (if selected-for-chapter?
+                                               "green"
+                                               "grey")
+                           :grid-template-columns (if leveling-view?
+                                                    "400px 200px"
+                                                    "400px 0px")}
+           :on-mouse-over #(rf/dispatch [:play-animation character :attack])
+           :on-mouse-out  #()
+           :on-click      #(rf/dispatch [:toggle-select-for-chapter
+                                         full-name])}
+     [:div
+      [character-name character]
+      [:img {:src image}]
+      [:p (name class-keyword)]
+      [:p (get-health character) " / " (get-max-health character) " health"]
+      [:p (str weapon-levels)]
+      [:button.btn.btn-outline-primary
+       {:on-click #(rf/dispatch [:toggle-character-leveling-pane full-name])}
+       "Level Up / Reclass"]
+      [element-view affinities]]
+     [:div {:style {;:transition "all .5s linear"
+                    :background-color "red"
+                    :display    (if leveling-view? "block" "none")
+                    :width      (if leveling-view? "100%" "0%")}}
+      [character-leveling-panel character]]]))

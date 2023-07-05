@@ -10,6 +10,7 @@
     [app.interface.utils :refer [get-only]]
     [app.interface.initial-db :refer [initial-db]]
     ; Included just so reframe events are picked up
+    [app.interface.view-state]
     [app.interface.movement]
     [app.interface.dialogue]
     [app.interface.attacking]
