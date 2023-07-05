@@ -17,6 +17,74 @@ Eventually they learn that their intention reading is granted to them by a
 spirit/demon that will sometimes warp what they see to serve their own
 intentions.
 
+### Outline
+
+#### Preface
+
+Florian is woken up by his roommate Leo - they planned to go to the market
+together and are running late.
+
+#### Chapter 1: Scrap at the Market
+
+As they get to the market, Florian has a vision of someone assassinating someone
+else before it happens.  He reflexively bumps the assassin and draws his anger.
+
+The assassin accuses Floian of "being in league with the academy heretics".
+
+The would be target, Asmond, joins up with Florian and Leo as they fight off the
+assassins.
+
+The battle involves killing one assassin and then fleeing to a safe tile as a
+much more powerful assassin chases them.
+
+After the battle, Asmond, Florian, and Leo regroup and try to figure out what is
+going on.  They decide to go to the city gaurd to report the incident.
+
+#### Chapter 2: Corrupted
+
+The gaurds immediately jail them for the murder of the one assassin.
+
+While they are in jail, some other assassins come to finish them off.
+
+Of of the assassins, Viriis has some doubts about what their co-assassins are
+doing.
+If someone talks to her during the fight she will join the party.
+
+Upon defeating the assassins, they all decide to flee the city.
+
+#### Chapter 3: Survival and Answers
+
+The group get a room in a local village inn.
+This inn promptly gets attacked by bandits.
+
+One of the bandits is recruitable.
+
+#### Chapter 4:
+
+#### Chapter 5:
+
+
+## Characters
+
+### Florian
+
+Main Character.  A scholar studying the nature of light at Esruia university.
+
+
+### Leo
+
+Florian's roommate.  A skirmisher studying to be an officer in the army.
+
+
+### Asmond
+
+Classmate studying biology.  A necromancer (come up with better name for this class).
+
+
+### Viriis
+
+Assassin hired off the street to kill Florian and co.
+
 
 ## Lore / World
 
