@@ -38,8 +38,15 @@
                           (when is-legal-move
                            (rf/dispatch [:preview-move-intention tile])))
       :on-mouse-out  #()
-      :on-click      #(cond is-legal-move   (rf/dispatch
-                                              [:declare-move-intention tile]))}
+      :on-click      #(if is-legal-move
+                        (rf/dispatch
+                          [:declare-move-intention tile])
+                        (rf/dispatch
+                          [:message
+                           "This tile is out of movement range. Remember that
+                           characters can only move through tiles for which
+                           their affinities meet or exceed the tile's
+                           aspects!"]))}
                             ; Moving into another characters range
                             ; automatically fights if the other character
                             ; sticks around
@@ -70,13 +77,11 @@
 
 
 (defn tile-info-view
-  [{:keys [row-idx col-idx] {:keys [terrain steps-to-move-through]} :land}]
+  [{:keys [row-idx col-idx] {:keys [terrain aspects]} :land}]
   [:div
    [:p row-idx ", " col-idx]
    [:p (name terrain)]
-   [:p (if (nil? steps-to-move-through)
-         "impassible"
-         (str steps-to-move-through " steps to traverse"))]])
+   [:p (str aspects)]])
 
 
 (defn gridmap-view

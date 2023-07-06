@@ -163,8 +163,7 @@
     [:p.affinity-desc
      "Base Move Range is the distance in steps a character can move in a turn.
      Note that different tiles take a different number of steps to move do
-     based on their affinities and the moving character's affinities
-     (TODO implement this by changing pathfinding.get-steps-to-move-to)!"]]
+     based on their affinities and the moving character's affinities!"]]
    [:div
     [:b "Water " water] " / " (calc-defense affinities) " Defense"
     [:p.affinity-desc "Meditative, redirecting."]
