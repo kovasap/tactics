@@ -48,7 +48,7 @@
       :class-keyword :skirmisher
       :controlled-by-player? true
       :equipped-weapon :sword-and-shield
-      :affinities {:fire 1 :air 1 :earth 8 :water 3 :light 0 :dark 0}})])
+      :affinities {:fire 1 :air 1 :earth 8 :water 3 :light 1 :dark 0}})])
 
 (defn parse-gridmap-str-with-characters
   [gridmap-str scenario-name]
@@ -65,17 +65,17 @@
   (let
     [[scenario-1-map scenario-1-characters]
      (parse-gridmap-str-with-characters
-       "F   M   M   R   FH  PT  P   W  
-        M   W   M   R   F   P   P   W
-        M   M   F   R   F   P   P   W
-        Ms  M   M   R   F   P   P   W
-        Ms  C   C   R   C   C   C   W
-        Fs  M   Ma  R   Fa  F   F   W
-        F   M   M   R   W   F   F   W
-        W   M   M   W   W   W   F   W
-        S   M   S   S   W   F   F   W
-        S   S   S   Sa  S   F   F   W
-        S   S   S   S   S   F   F   W"
+       "M   M   M   W   FH  PT  R   R  
+        M   M   F   W   F   R   R   P
+        M   M   R   B   R   R   P   P
+        Rs  R   R   W   W   P   P   P
+        Ms  F   W   W   F   F   F   P
+        Fs  F   Fa  W   Fa  F   F   F
+        F   F   F   W   W   F   F   F
+        F   F   F   W   W   W   F   F
+        F   W   W   W   W   F   F   F
+        W   W   W   W   F   F   F   F
+        W   W   W   W   F   F   F   F"
        "scenario-1")]
     {:scenes         {:overworld  {}
                       :start      {}

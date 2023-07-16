@@ -15,7 +15,7 @@
     (> (inc (get-steps-left-to-move character))
        ; alternative: as the bird flies distance
        ; (distance from-tile tile)
-       (get-number-of-path-steps (get-path gridmap from-tile tile))))
+       (get-number-of-path-steps (get-path gridmap from-tile tile) character)))
    #(assoc % :is-legal-move true))))
 
 (defn reset-movement-status

@@ -10,7 +10,7 @@
     :terrain       :plains
     :perlin-cutoff 0.3
     :aspects {:fire 1 :air 1 :earth 1 :water 1 :light 1 :dark 0}
-    :style         {:background-color "orange"}}
+    :style         {:background-color "LightGreen"}}
    {:letter        "W"
     :terrain       :water
     :perlin-cutoff 0.0
@@ -32,8 +32,12 @@
     :style         {:background-color "DimGrey"}}
    {:letter        "R"
     :terrain       :road
-    :aspects {:fire 1 :air 0 :earth 1 :water 0 :light 1 :dark 0}
+    :aspects {:fire 0 :air 0 :earth 0 :water 0 :light 1 :dark 0}
     :style         {:background-color "AntiqueWhite"}}
+   {:letter        "B"
+    :terrain       :bridge
+    :aspects {:fire 0 :air 0 :earth 1 :water 0 :light 1 :dark 0}
+    :style         {:background-color "Brown"}}
    {:letter        "V"
     :terrain       :void
     :perlin-cutoff 10.0

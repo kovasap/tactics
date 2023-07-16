@@ -22,7 +22,8 @@
               :z-index          2 ;  Specify a stack order in case you're
                                   ; using a different order for other elements
                                   ; 
-              :cursor           "pointer"}}
+              :cursor           "pointer"}
+      :on-click #(rf/dispatch [:advance-dialogue])}
      [:div {:style {:position "absolute"
                     ; TODO make this appear in the center of the screen, or
                     ; maybe over the character that's saying it?
@@ -39,8 +40,5 @@
                         :white-space "nowrap"
                         :margin "0 auto"
                         :animation "typing 3.5s steps(40, end)"}}
-          text]]
-       [:button.btn.btn-outline-primary {:on-click #(rf/dispatch
-                                                      [:advance-dialogue])}
-        "Advance dialogue"]]]))
+          text]]]]))
 
