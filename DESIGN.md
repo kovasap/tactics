@@ -101,6 +101,12 @@ what all other characters will do in response.
 
 Maybe this ability could be togglable.
 
+## Progression
+
+Leveling should be more chunked, where character power level doesn't change as the player grows them in various ways.  Then once a set of conditions is fulfilled, the character levels.  this is in opposition to a more gradual curve where characters get stronger bit by bit.  
+
+Every story scenario should have enemy characters one chunk above the last scenario.  This makes it a implicit objective for the player to make sure each of their characters is leveled one Chunk in each scenario to keep up.
+
 ## Overworld
 
 Similar to Wargroove, you advance to the next chapter by travelling on an
