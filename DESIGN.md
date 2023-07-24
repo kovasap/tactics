@@ -107,6 +107,16 @@ Leveling should be more chunked, where character power level doesn't change as t
 
 Every story scenario should have enemy characters one chunk above the last scenario.  This makes it a implicit objective for the player to make sure each of their characters is leveled one Chunk in each scenario to keep up.
 
+### Classes
+
+Unlike how it is in the code right now, classes should each have a hardcoded set of stats (as opposed to affinities defining stats).  This should:
+
+1. Make it clearer that "if a character is this class, they behave like this"
+1. Add a gameplay element of, before each schenario, making sure you have a good
+   party composition by changing character classes.
+
+To give characters more uniqueness, they could each have a "favored" set of affinities that give them _minor_ bonuses to certain stats regardless of class.
+
 ## Overworld
 
 Similar to Wargroove, you advance to the next chapter by travelling on an
