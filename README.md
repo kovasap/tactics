@@ -1,5 +1,8 @@
 # Tactics
 
+See https://github.com/kovasap/tactics/blob/main/DESIGN.md for an explanation of the game itself.
+This readme is mostly technical details about how to run it or develop it.
+
 ## Setup
 
 First, install dependencies:
