@@ -2,11 +2,9 @@
 
 ## Gameplay
 
-Grid based tactics.
-Whenever you plan out your character's move (before committing it), you will see
-what all other characters will do in response.
+Grid based tactics with phased turns.  All of your characters move, then all opposing characters move.
 
-Maybe this ability could be togglable.
+When moving your character (hovering over possible tiles to move to), all enemy movements will be shown as ghost images on the tiles they would move to, given your proposed move.  Upon ending your turn, the opponent's moves will execute exactly as shown.  This is explained as your main character having a prescience granted to them by a being important to the story.
 
 ## Progression
 
@@ -19,9 +17,13 @@ Every story scenario should have enemy characters one chunk above the last scena
 Characters have affinities for different elements, as inspired by
 https://github.com/kovasap/journey_game/blob/master/spec/spec.md#elements.
 
-See detailed affinity descriptions at https://github.com/kovasap/tactics/blob/7e33ae9d132f9ece8dc1b5664b5df067e8dca173/src/main/app/interface/view/character.cljs#L138.
+See detailed affinity descriptions:
 
-Affinities will let characters adopt classes (defined at https://github.com/kovasap/tactics/blob/7e33ae9d132f9ece8dc1b5664b5df067e8dca173/src/main/app/interface/constant_game_data.cljs#L24).  The classes need to be unlocked first via quest scenarios discovered on the world map.
+https://github.com/kovasap/tactics/blob/7e33ae9d132f9ece8dc1b5664b5df067e8dca173/src/main/app/interface/view/character.cljs#L138-L191
+
+Affinities will let characters adopt classes.  The classes need to be unlocked first via quest scenarios discovered on the world map.  See classes:
+
+https://github.com/kovasap/tactics/blob/7e33ae9d132f9ece8dc1b5664b5df067e8dca173/src/main/app/interface/constant_game_data.cljs#L24-L75
 
 Unlike how it is in the code right now, classes should each have a hardcoded set of stats (as opposed to affinities defining stats).  This should:
 
