@@ -1,5 +1,55 @@
 # Design
 
+## Gameplay
+
+Grid based tactics.
+Whenever you plan out your character's move (before committing it), you will see
+what all other characters will do in response.
+
+Maybe this ability could be togglable.
+
+## Progression
+
+Leveling should be more chunked, where character power level doesn't change as the player grows them in various ways.  Then once a set of conditions is fulfilled, the character levels.  this is in opposition to a more gradual curve where characters get stronger bit by bit.  
+
+Every story scenario should have enemy characters one chunk above the last scenario.  This makes it a implicit objective for the player to make sure each of their characters is leveled one Chunk in each scenario to keep up.
+
+### Character Development and Classes
+
+Characters have affinities for different elements, as inspired by
+https://github.com/kovasap/journey_game/blob/master/spec/spec.md#elements.
+
+See detailed affinity descriptions at https://github.com/kovasap/tactics/blob/7e33ae9d132f9ece8dc1b5664b5df067e8dca173/src/main/app/interface/view/character.cljs#L138.
+
+Affinities will let characters adopt classes (defined at https://github.com/kovasap/tactics/blob/7e33ae9d132f9ece8dc1b5664b5df067e8dca173/src/main/app/interface/constant_game_data.cljs#L24).  The classes need to be unlocked first via quest scenarios discovered on the world map.
+
+Unlike how it is in the code right now, classes should each have a hardcoded set of stats (as opposed to affinities defining stats).  This should:
+
+1. Make it clearer that "if a character is this class, they behave like this"
+1. Add a gameplay element of, before each schenario, making sure you have a good
+   party composition by changing character classes.
+
+To give characters more uniqueness, they could each have a "favored" set of affinities that give them _minor_ bonuses to certain stats regardless of class.
+
+## Overworld
+
+Similar to Wargroove, you advance to the next chapter by travelling on an
+overworld.
+However, unlike wargroove, there are more chapters spiderwebbing out into
+different biomes.
+After completing optional chapters in these biomes, NPCs will teach you about
+new classes your characters can now adopt.
+
+### World Layout
+
+The world is a sprawling continent with six radially distributed regions, each
+with affinity to a different element.
+In the center of the world there is a large region that has no constant dominant
+element, but rather goes through cycles of dominance over time.
+The world has six seasons, one for each element, and the central region is
+swayed to one element or another based on the season.
+
+
 ## Story
 
 Main character has the ability to see the immediate intentions of others.
@@ -86,51 +136,3 @@ Classmate studying biology.  A necromancer (come up with better name for this cl
 Assassin hired off the street to kill Florian and co.
 
 
-## Lore / World
-
-Characters have affinities for different elements, as described at
-https://github.com/kovasap/journey_game/blob/master/spec/spec.md#elements.  This
-affinity could be used instead of "class" when character building.
-
-
-## Gameplay
-
-Grid based tactics.
-Whenever you plan out your character's move (before committing it), you will see
-what all other characters will do in response.
-
-Maybe this ability could be togglable.
-
-## Progression
-
-Leveling should be more chunked, where character power level doesn't change as the player grows them in various ways.  Then once a set of conditions is fulfilled, the character levels.  this is in opposition to a more gradual curve where characters get stronger bit by bit.  
-
-Every story scenario should have enemy characters one chunk above the last scenario.  This makes it a implicit objective for the player to make sure each of their characters is leveled one Chunk in each scenario to keep up.
-
-### Classes
-
-Unlike how it is in the code right now, classes should each have a hardcoded set of stats (as opposed to affinities defining stats).  This should:
-
-1. Make it clearer that "if a character is this class, they behave like this"
-1. Add a gameplay element of, before each schenario, making sure you have a good
-   party composition by changing character classes.
-
-To give characters more uniqueness, they could each have a "favored" set of affinities that give them _minor_ bonuses to certain stats regardless of class.
-
-## Overworld
-
-Similar to Wargroove, you advance to the next chapter by travelling on an
-overworld.
-However, unlike wargroove, there are more chapters spiderwebbing out into
-different biomes.
-After completing optional chapters in these biomes, NPCs will teach you about
-new classes your characters can now adopt.
-
-### World Layout
-
-The world is a sprawling continent with six radially distributed regions, each
-with affinity to a different element.
-In the center of the world there is a large region that has no constant dominant
-element, but rather goes through cycles of dominance over time.
-The world has six seasons, one for each element, and the central region is
-swayed to one element or another based on the season.
