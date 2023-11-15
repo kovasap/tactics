@@ -1,10 +1,33 @@
 # Design
 
-## Gameplay
+## Combat
 
-Grid based tactics with phased turns.  All of your characters move, then all opposing characters move.
+TODO update the code to match this description
 
-When moving your character (hovering over possible tiles to move to), all enemy movements will be shown as ghost images on the tiles they would move to, given your proposed move.  Upon ending your turn, the opponent's moves will execute exactly as shown.  This is explained as your main character having a prescience granted to them by a being important to the story.
+Grid based tactics with phased turns.
+All of your characters move, then all opposing characters move.
+
+Before committing your turn, you can freely move your characters and have them
+use their abilities.
+Every time you do this, all intended enemy movements/ability usages will be
+shown as ghost images on the tiles they would occur if you committed your turn
+right away.
+Upon committing your turn, the opponent's moves will execute exactly as shown.
+This is explained as your main character having a prescience granted to them by
+a being important to the story.
+
+All classes/jobs have a suite of abilities.
+There will be many "restrictive" abilities that can only be used in certain
+contexts (e.g. on an enemy flanked by multiple friendlies).
+This should give each class a very unique play style, and make them useless in
+certain situations if the game state wasn't set up for them properly in prior
+turns.
+
+Characters can level classes/jobs by taking them as their primary class/job, and
+they can have a secondary to gain access to more abilities (like in horizon's
+gate).
+However in order to gain access to classes the character must have the proper
+affinity.
 
 ## Progression
 
