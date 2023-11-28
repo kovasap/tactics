@@ -45,7 +45,8 @@
                                            :character
                                            character])
              :on-mouse-out  #()
-             :style         {:z-index 2}}
+             :style         {:z-index 2
+                             :opacity   (if is-intention? 0.3 1.0)}}
        [:div.character
         {:style {:position   "absolute"
                  :overflow   "visible"
@@ -76,8 +77,7 @@
          "Utility"]]
        [character-name character]
        [:br]
-       [:img {:style {:opacity   (if is-intention? 0.2 1.0)
-                      :transform (if dead "rotate(90deg)" nil)
+       [:img {:style {:transform (if dead "rotate(90deg)" nil)
                       :z-index   20
                       :filter    (if (not (empty? attacks))
                                    "drop-shadow(0px 0px 20px red)"

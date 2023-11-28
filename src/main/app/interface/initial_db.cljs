@@ -61,6 +61,8 @@
      (map :generated-character (get-tiles gridmap :generated-character))]))
 
 
+; FLAT is better than NESTED - try to keep every system in the game interacting
+; with a top level key in this db.
 (def initial-db
   (let
     [[scenario-1-map scenario-1-characters]
