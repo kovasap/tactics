@@ -1,5 +1,9 @@
 # Design
 
+## TODOS
+
+ - design one dungeon and make it playable
+
 ## Combat
 
 TODO update the code to match this description
@@ -33,8 +37,6 @@ affinity.
 
 Leveling should be more chunked, where character power level doesn't change as the player grows them in various ways.  Then once a set of conditions is fulfilled, the character levels.  this is in opposition to a more gradual curve where characters get stronger bit by bit.  
 
-Every story scenario should have enemy characters one chunk above the last scenario.  This makes it a implicit objective for the player to make sure each of their characters is leveled one Chunk in each scenario to keep up.
-
 ### Character Development and Classes
 
 Characters have affinities for different elements, as inspired by
@@ -58,12 +60,21 @@ To give characters more uniqueness, they could each have a "favored" set of affi
 
 ## Overworld
 
-Similar to Wargroove, you advance to the next chapter by travelling on an
-overworld.
-However, unlike wargroove, there are more chapters spiderwebbing out into
-different biomes.
-After completing optional chapters in these biomes, NPCs will teach you about
-new classes your characters can now adopt.
+The world contains many dungeons for the player to explore with different enemies, hazards, etc.
+Each dungeon has multiple combat encounter "floors" each from a set of scenarios like:
+
+ - Kill all monsters
+ - Defend an object
+ - Reach a certain tile
+
+Characters that die in a dungeon will die permanently.
+At any time, you can "escape" from a dungeon with all the loot you have so far.
+Dungeons should be designed in such a way that it's expected for players to
+retreat many times before finally completing the dungeon.
+
+After encounters, random loot will be generated for the player.
+Additionally, new classes / recruits can be found in the dungeons.
+
 
 ### World Layout
 
@@ -75,7 +86,7 @@ The world has six seasons, one for each element, and the central region is
 swayed to one element or another based on the season.
 
 
-## Story
+## Story - Old, probably wont use
 
 Main character has the ability to see the immediate intentions of others.
 
