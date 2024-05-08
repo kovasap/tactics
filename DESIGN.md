@@ -37,6 +37,8 @@ affinity.
 
 Leveling should be more chunked, where character power level doesn't change as the player grows them in various ways.  Then once a set of conditions is fulfilled, the character levels.  this is in opposition to a more gradual curve where characters get stronger bit by bit.  
 
+Additionally, leveling should be set up so that you can't "grind" against lower level enemies to become overpowered and trivialize higher level encounters.  This could be implemented by having a separate XP bar for each specific source of XP (e.g. a monster type).  Once some number of the same XP source has been defeated, the XP bar for that source "maxes out", and the character can no longer get ANY XP from that source.  This can be communicated to the player as "Character X has learned all they can from this monster", or "Character X has mastered this monster".
+
 ### Character Development and Classes
 
 Characters have affinities for different elements, as inspired by
