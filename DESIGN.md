@@ -20,18 +20,13 @@ Upon committing your turn, the opponent's moves will execute exactly as shown.
 This is explained as your main character having a prescience granted to them by
 a being important to the story.
 
-All classes/jobs have a suite of abilities.
-There will be many "restrictive" abilities that can only be used in certain
-contexts (e.g. on an enemy flanked by multiple friendlies).
-This should give each class a very unique play style, and make them useless in
-certain situations if the game state wasn't set up for them properly in prior
-turns.
+On every turn, each character has action points that they can use to use abilities.  Movement happens via abilities; all characters have a "walk" ability to move between tiles.
 
-Characters can level classes/jobs by taking them as their primary class/job, and
-they can have a secondary to gain access to more abilities (like in horizon's
-gate).
-However in order to gain access to classes the character must have the proper
-affinity.
+When hovering over a tile (or its contents), the abilities that can be used on that tile (or its contents) are overlayed on that tile so they can be easily clicked.
+
+### Attacking and Defending
+
+Abilities that do damage to a tile's contents have both a "swiftness" and a "power" associated with them.  Defenders have an "agility" and "armor" attached to them based on their class.  If the swiftness is greater than or equal to the agility, the attack will hit, otherwise it will miss (no RNG).  Same goes for the power/armor.  This means that some classes will be able to infintely tank certain attacks.
 
 ## Progression
 
@@ -59,6 +54,19 @@ Unlike how it is in the code right now, classes should each have a hardcoded set
    party composition by changing character classes.
 
 To give characters more uniqueness, they could each have a "favored" set of affinities that give them _minor_ bonuses to certain stats regardless of class.
+
+All classes/jobs have a suite of abilities.
+There will be many "restrictive" abilities that can only be used in certain
+contexts (e.g. on an enemy flanked by multiple friendlies).
+This should give each class a very unique play style, and make them useless in
+certain situations if the game state wasn't set up for them properly in prior
+turns.
+
+Characters can level classes/jobs by taking them as their primary class/job, and
+they can have a secondary to gain access to more abilities (like in horizon's
+gate).
+However in order to gain access to classes the character must have the proper
+affinity.
 
 ## Overworld
 
