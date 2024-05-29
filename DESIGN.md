@@ -20,19 +20,47 @@ Upon committing your turn, the opponent's moves will execute exactly as shown.
 This is explained as your main character having a prescience granted to them by
 a being important to the story.
 
-On every turn, each character has action points that they can use to use abilities.  Movement happens via abilities; all characters have a "walk" ability to move between tiles.
+On every turn, each character has action points that they can use to use
+abilities.
+Movement happens via abilities; all characters have a "walk" ability to move
+between tiles.
 
-When hovering over a tile (or its contents), the abilities that can be used on that tile (or its contents) are overlayed on that tile so they can be easily clicked.
+When hovering over a tile (or its contents), the abilities that can be used on
+that tile (or its contents) are overlayed on that tile so they can be easily
+clicked.
 
 ### Attacking and Defending
 
-Abilities that do damage to a tile's contents have both a "swiftness" and a "power" associated with them.  Defenders have an "agility" and "armor" attached to them based on their class.  If the swiftness is greater than or equal to the agility, the attack will hit, otherwise it will miss (no RNG).  Same goes for the power/armor.  This means that some classes will be able to infintely tank certain attacks.
+Abilities that do damage to a tile's contents have both a "swiftness" and a
+"power" associated with them.
+Defenders have an "agility" and "armor" attached to them based on their class.
+If the swiftness is greater than or equal to the agility, the attack will hit,
+otherwise it will miss (no RNG).
+Same goes for the power/armor.
+This means that some classes will be able to infinitely tank certain attacks.
+
+### Zone of Control
+
+Melee classes exert a zone of control based on the melee attacks they can
+perform.
+Enemies cannot move out of it without using a "dodge" ability.
 
 ## Progression
 
-Leveling should be more chunked, where character power level doesn't change as the player grows them in various ways.  Then once a set of conditions is fulfilled, the character levels.  this is in opposition to a more gradual curve where characters get stronger bit by bit.  
+Leveling should be more chunked, where character power level doesn't change as
+the player grows them in various ways.
+Then once a set of conditions is fulfilled, the character levels.
+this is in opposition to a more gradual curve where characters get stronger bit
+by bit.
 
-Additionally, leveling should be set up so that you can't "grind" against lower level enemies to become overpowered and trivialize higher level encounters.  This could be implemented by having a separate XP bar for each specific source of XP (e.g. a monster type).  Once some number of the same XP source has been defeated, the XP bar for that source "maxes out", and the character can no longer get ANY XP from that source.  This can be communicated to the player as "Character X has learned all they can from this monster", or "Character X has mastered this monster".
+Additionally, leveling should be set up so that you can't "grind" against lower
+level enemies to become overpowered and trivialize higher level encounters.
+This could be implemented by having a separate XP bar for each specific source
+of XP (e.g. a monster type).
+Once some number of the same XP source has been defeated, the XP bar for that
+source "maxes out", and the character can no longer get ANY XP from that source.
+This can be communicated to the player as "Character X has learned all they can
+from this monster", or "Character X has mastered this monster".
 
 ### Character Development and Classes
 
