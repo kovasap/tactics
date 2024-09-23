@@ -6,19 +6,25 @@
 
 ## Combat
 
-TODO update the code to match this description
+### Turn Order
 
-Grid based tactics with phased turns.
-All of your characters move, then all opposing characters move.
+All players (e.g. you, your opponent) have one character take their turn before
+giving control to the next player.
+They can choose any character to act, except those that are "exhausted".
+A character becomes exhausted after they act, and becomes "refreshed" after a
+certain number of other characters have acted, depending on their air affinity.
+Some characters will have abilities that take place "on refresh" that occur
+whether they take their turn or not.
+Refreshing happens at regular intervals even if a character is not exhausted.
 
-Before committing your turn, you can freely move your characters and have them
-use their abilities.
-Every time you do this, all intended enemy movements/ability usages will be
-shown as ghost images on the tiles they would occur if you committed your turn
-right away.
-Upon committing your turn, the opponent's moves will execute exactly as shown.
-This is explained as your main character having a prescience granted to them by
-a being important to the story.
+### Prescience
+
+There is a toggle that will let you see the enemy intention at any given time
+(the move they would take next).
+I'm not sure yet if this should be viewable by the player in certain situations
+or not.
+
+### Actions
 
 On every turn, each character has action points that they can use to use
 abilities.
@@ -31,13 +37,11 @@ clicked.
 
 ### Attacking and Defending
 
-Abilities that do damage to a tile's contents have both a "swiftness" and a
-"power" associated with them.
-Defenders have an "agility" and "armor" attached to them based on their class.
-If the swiftness is greater than or equal to the agility, the attack will hit,
-otherwise it will miss (no RNG).
-Same goes for the power/armor.
-This means that some classes will be able to infinitely tank certain attacks.
+Abilities that do damage to a tile's contents have "accuracy" and "damage".
+
+Accuracy targets the "poise" defense, and damage targets the "health" defense.
+All poise must be overcome before damage is done.
+Poise and rarely health can be recovered "on refresh".
 
 ### Zone of Control
 
