@@ -43,6 +43,14 @@ Accuracy targets the "poise" defense, and damage targets the "health" defense.
 All poise must be overcome before damage is done.
 Poise and rarely health can be recovered "on refresh".
 
+#### Randomness
+
+Ideally the game would have no to-hit chances.
+If it looks like they are necessary, every skill should have a specific
+condition that guarantees a hit.
+For example, a spear strike at a range of two, or a sword slash when you have an
+adjacent ally.
+
 ### Zone of Control
 
 Melee classes exert a zone of control based on the melee attacks they can
