@@ -12,7 +12,14 @@ All players (e.g. you, your opponent) have one character take their turn before
 giving control to the next player.
 They can choose any character to act, except those that are "exhausted".
 A character becomes exhausted after they act, and becomes "refreshed" after a
-certain number of other characters have acted, depending on their air affinity.
+certain amount of "time", depending on their air affinity.
+"Time" per turn is determined by the total number of units left on the
+battlefield, to prevent you fielding more units that just do nothing to have
+your favorite units take more turns.
+
+To start with, the time to refresh will be set such that most of the time every
+character on the field must be used once before any refresh.
+
 Some characters will have abilities that take place "on refresh" that occur
 whether they take their turn or not.
 Refreshing happens at regular intervals even if a character is not exhausted.
