@@ -19,7 +19,6 @@
                        :border-radius "50%"}}]
     [:div scene-name]])
     
-
 (defn overworld
   []
   [:div

@@ -81,19 +81,23 @@
        "scenario-1")]
     {:scenes         {:overworld  {}
                       :start      {}
-                      :scenario-1 {:intro-dialogue
-                                   [{:character-full-name "Main Character"
-                                     :text "Here we can start our journey"}
-                                    {:character-full-name "Main Character"
-                                     :text {:fire  "Let's move!"
-                                            :dark  "Let's get going!"
-                                            :air   "Catch me if you can!"
-                                            :earth "Give me that pack."
-                                            :water "..."
-                                            :light "I can see the trail"}}]
+                      :scenario-1 {
+                                   ; :intro-dialogue
+                                   ; [{:character-full-name "Main Character"
+                                   ;   :text "Here we can start our journey"}
+                                   ;  {:character-full-name "Main Character"
+                                   ;   :text {:fire  "Let's move!"
+                                   ;          :dark  "Let's get going!"
+                                   ;          :air   "Catch me if you can!"
+                                   ;          :earth "Give me that pack."
+                                   ;          :water "..."
+                                   ;          :light "I can see the trail"}}]
                                    :gridmap scenario-1-map
                                    :location-on-map ["500" "400"]}}
      :characters     (associate-by :full-name
                                    (concat characters scenario-1-characters))
      :dialogue-queue '()
-     :current-scene  :overworld}))
+     :current-scenario {:gridmap {}
+                        :action-queue []
+                        :characters {}}
+     :current-scene  :scenario-1}))

@@ -3,5 +3,5 @@
 (defn start-scene
   []
   [:div "Starting scene!"]
-  [:p "This is an intro paragraph"]
-  )
+  [:p "This is an intro paragraph"])
+  

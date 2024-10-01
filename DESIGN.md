@@ -34,11 +34,21 @@ or not.
 ### Actions
 
 On every turn, each character has action points that they can use to use
-abilities.
-Movement happens via abilities; all characters have a "walk" ability to move
+actions.
+Movement happens via actions; all characters have a "walk" action to move
 between tiles.
 
-When hovering over a tile (or its contents), the abilities that can be used on
+#### Action Queue
+
+When the player declares they want to make an action (or multiple actions) on
+their turn, these actions are added to a queue of pending actions.
+These pending actions are shown with a greyed out UI.
+These pending actions are also used to calculate the opponent's action, which is
+also optionally shown with a greyed out UI.
+
+#### UI
+
+When hovering over a tile (or its contents), the actions that can be used on
 that tile (or its contents) are overlayed on that tile so they can be easily
 clicked.
 
